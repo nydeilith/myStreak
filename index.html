@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="hacker">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Cloud Streak Sync</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* TEMA AYARLARI */
+        :root[data-theme="default"] { --bg-color: #0f172a; --card-bg: rgba(30, 41, 59, 0.95); --primary: #3b82f6; --text-main: #f8fafc; --text-sub: #94a3b8; --border-color: rgba(255, 255, 255, 0.05); --font-main: 'Inter', sans-serif; --cal-active: #3b82f6; }
+        :root[data-theme="hacker"] { --bg-color: #000000; --card-bg: rgba(0, 20, 0, 0.9); --primary: #00ff41; --text-main: #00ff41; --text-sub: #008f11; --border-color: #003b00; --font-main: 'Fira Code', monospace; --cal-active: #00ff41; }
+        :root[data-theme="light"] { --bg-color: #f1f5f9; --card-bg: rgba(255, 255, 255, 0.95); --primary: #2563eb; --text-main: #1e293b; --text-sub: #64748b; --border-color: #e2e8f0; --font-main: 'Inter', sans-serif; --cal-active: #2563eb; }
+        :root[data-theme="cyberpunk"] { --bg-color: #120024; --card-bg: rgba(42, 10, 59, 0.9); --primary: #d946ef; --text-main: #fae8ff; --text-sub: #a855f7; --border-color: #d946ef; --font-main: 'Inter', sans-serif; --cal-active: #d946ef; }
+        :root[data-theme="forest"] { --bg-color: #1a2e1a; --card-bg: rgba(38, 60, 38, 0.9); --primary: #4ade80; --text-main: #ecfccb; --text-sub: #84cc16; --border-color: rgba(255, 255, 255, 0.1); --font-main: 'Inter', sans-serif; --cal-active: #4ade80; }
+        :root[data-theme="sunset"] { --bg-color: #2b1111; --card-bg: rgba(69, 26, 26, 0.9); --primary: #f97316; --text-main: #fff7ed; --text-sub: #fdba74; --border-color: rgba(255, 255, 255, 0.1); --font-main: 'Inter', sans-serif; --cal-active: #f97316; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); transition: all 0.3s ease; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; padding: 2rem; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        #matrixCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none; }
+        .container { width: 100%; max-width: 650px; position: relative; z-index: 10; padding-bottom: 50px; }
+        header { display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem; text-align: center; }
+        header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .theme-wrapper select { padding: 8px 12px; border-radius: 8px; background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); cursor: pointer; outline: none; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 2rem; background: var(--card-bg); padding: 10px; border-radius: 12px; border: 1px solid var(--border-color); backdrop-filter: blur(10px); }
+        input[type="text"] { flex: 1; background: transparent; border: none; color: var(--text-main); padding: 10px 15px; font-size: 1rem; outline: none; }
+        button.add-btn { background-color: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        ul { list-style: none; }
+        .habit-item { margin-bottom: 1rem; }
+        .habit-card { background-color: var(--card-bg); backdrop-filter: blur(10px); padding: 1.5rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color); position: relative; z-index: 2; }
+        .habit-info { flex: 1; }
+        .habit-name { font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+        .habit-details { font-size: 0.85rem; color: var(--text-sub); margin-top: 5px; display: flex; gap: 10px; align-items: center; }
+        .status-badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.1); }
+        .status-done { background: var(--primary); color: #000; font-weight: bold; }
+        .controls { display: flex; gap: 8px; }
+        .btn-icon { background: transparent; border: 1px solid var(--border-color); color: var(--text-sub); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-icon:hover { background-color: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .btn-disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+        
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 999; display: flex;
+            justify-content: center; align-items: center; color: var(--primary);
+            font-family: monospace; font-size: 1.2rem;
+        }
+
+        .calendar-wrapper { background-color: var(--card-bg); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 12px 12px; padding: 1rem; margin-top: -5px; display: none; animation: slideDown 0.3s ease-out forwards; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: var(--text-main); font-weight: bold; }
+        .cal-nav { background: none; border: none; color: var(--text-main); cursor: pointer; font-size: 1.2rem; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .cal-day-name { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 5px; }
+        .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border-radius: 4px; color: var(--text-sub); border: 1px solid transparent; }
+        .cal-day.current-month { color: var(--text-main); background: rgba(255,255,255,0.02); }
+        .cal-day.today { border: 1px solid var(--text-sub); }
+        .cal-day.completed { background-color: var(--cal-active); color: #000; font-weight: bold; box-shadow: 0 0 10px var(--cal-active); }
+        .empty-state { text-align: center; color: var(--text-sub); margin-top: 3rem; }
+        
+        /* Editlenebilir Streak Alanı */
+        .streak-count { cursor: pointer; border-bottom: 1px dashed var(--primary); }
+        .streak-count:hover { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingOverlay">
+        <i class="fa-solid fa-satellite-dish fa-spin" style="margin-right: 10px;"></i>
+        SYNCING_CLOUD_DATA...
+    </div>
+
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <header>
+            <h1>>> CLOUD_STREAK</h1>
+            <div class="theme-wrapper" style="margin-top: 10px;">
+                <select id="themeSelector" onchange="changeTheme(this.value)">
+                    <option value="hacker">Hacker (Matrix)</option>
+                    <option value="default">Gece Mavisi</option>
+                    <option value="cyberpunk">Cyberpunk Neon</option>
+                    <option value="light">Aydınlık Mod</option>
+                    <option value="forest">Orman Yeşili</option>
+                    <option value="sunset">Gün Batımı</option>
+                </select>
+            </div>
+            <div id="syncStatus" style="font-size: 0.8rem; color: var(--text-sub); margin-top: 5px; font-family: monospace;">Offline</div>
+            
+            <button onclick="tryRestoreOldData()" style="margin-top:10px; background:none; border:1px solid #333; color:#666; padding:5px 10px; font-size:0.7rem; cursor:pointer; border-radius:5px;">
+                <i class="fa-solid fa-life-ring"></i> Eski Verileri Ara
+            </button>
+        </header>
+
+        <div class="input-group">
+            <input type="text" id="habitInput" placeholder="Yeni görev tanımla..." onkeypress="handleEnter(event)">
+            <button class="add-btn" onclick="addHabit()">EKLE</button>
+        </div>
+
+        <ul id="habitList"></ul>
+        <div id="emptyState" class="empty-state">Veri yok.</div>
+    </div>
+
+    <script>
+        // =========================================================
+        // SENİN BİLGİLERİN (AYNI KALDI)
+        // =========================================================
+        const BIN_ID = '69751843d0ea881f4082844a'; 
+        const API_KEY = '$2a$10$BjU3W9cEiulVcL2OBBHSuOY8aE04wbonAhKjxEe55FhPeU7lVck0O';
+        // =========================================================
+
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+        // Matrix Effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        let matrixInterval;
+        const alphabet = '01';
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        function initMatrix() { resizeCanvas(); columns = canvas.width/16; drops = Array(Math.floor(columns)).fill(1); }
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0'; ctx.font = '16px monospace';
+            for(let i=0; i<drops.length; i++) {
+                ctx.fillText(alphabet.charAt(Math.floor(Math.random()*alphabet.length)), i*16, drops[i]*16);
+                if(drops[i]*16 > canvas.height && Math.random() > 0.975) drops[i]=0;
+                drops[i]++;
+            }
+        }
+        function startMatrix() { canvas.style.display = 'block'; initMatrix(); matrixInterval = setInterval(drawMatrix, 30); window.addEventListener('resize', initMatrix); }
+        function stopMatrix() { canvas.style.display = 'none'; clearInterval(matrixInterval); window.removeEventListener('resize', initMatrix); }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'hacker';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeSelector').value = savedTheme;
+            savedTheme === 'hacker' ? startMatrix() : stopMatrix();
+        }
+        function changeTheme(val) {
+            document.documentElement.setAttribute('data-theme', val);
+            localStorage.setItem('selectedTheme', val);
+            val === 'hacker' ? startMatrix() : stopMatrix();
+        }
+
+        // --- CLOUD SYNC ---
+        let habits = [];
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        async function fetchFromCloud() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                if (!response.ok) throw new Error('API Bağlantı Hatası: ' + response.status);
+                const data = await response.json();
+                habits = data.record.habits || []; 
+                renderHabits();
+                updateSyncStatus('ONLINE: SYNCED', '#22c55e');
+            } catch (error) {
+                console.error(error);
+                updateSyncStatus('OFFLINE: ERROR', '#ef4444');
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        }
+
+        async function saveToCloud() {
+            updateSyncStatus('SYNCING...', '#f59e0b');
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify({ habits: habits })
+                });
+                if (!response.ok) throw new Error('Kaydedilemedi');
+                updateSyncStatus('DATA SAVED', '#22c55e');
+                renderHabits();
+            } catch (error) {
+                console.error(error);
+                updateSyncStatus('SAVE FAILED!', '#ef4444');
+                alert('Kaydedilemedi!');
+            }
+        }
+
+        // --- VERİ KURTARMA (ESKİ DATA) ---
+        function tryRestoreOldData() {
+            const v2 = localStorage.getItem('habits_v2');
+            const v1 = localStorage.getItem('habits');
+            
+            if (v2 || v1) {
+                if(confirm('Eski yerel veriler bulundu! Bunları buluta yükleyip mevcut olanın üzerine yazmak istiyor musun?')) {
+                    habits = JSON.parse(v2 || v1);
+                    // Veri formatını kontrol et (eskisinde history yoksa ekle)
+                    habits.forEach(h => { if(!h.history) h.history = []; });
+                    saveToCloud();
+                    alert("Veriler kurtarıldı ve buluta yüklendi!");
+                }
+            } else {
+                alert("Malesef tarayıcı hafızasında eski veri bulunamadı. Lütfen 'Edit' özelliğini kullanarak serini elle gir.");
+            }
+        }
+
+        function updateSyncStatus(msg, color) {
+            const el = document.getElementById('syncStatus');
+            el.innerText = msg;
+            el.style.color = color;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            fetchFromCloud();
+        });
+
+        function renderHabits() {
+            const list = document.getElementById('habitList');
+            const emptyState = document.getElementById('emptyState');
+            list.innerHTML = '';
+            
+            if (habits.length === 0) emptyState.style.display = 'block';
+            else emptyState.style.display = 'none';
+
+            habits.forEach(habit => {
+                const isDoneToday = habit.history && habit.history.includes(todayStr);
+                const li = document.createElement('li');
+                li.className = 'habit-item';
+                li.innerHTML = `
+                    <div class="habit-card">
+                        <div class="habit-info">
+                            <span class="habit-name" onclick="renameHabit(${habit.id})">${habit.name}</span>
+                            <div class="habit-details">
+                                <span><i class="fa-solid fa-trophy" style="color:var(--primary)"></i> Seri: <b class="streak-count" onclick="editStreak(${habit.id})" title="Sayiyi değiştirmek için tıkla">${habit.streak}</b> Gün</span>
+                                ${isDoneToday ? '<span class="status-badge status-done">BUGÜN TAMAM</span>' : '<span class="status-badge" style="opacity:0.5">BEKLİYOR</span>'}
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn-icon" onclick="toggleCalendar(${habit.id})"><i class="fa-regular fa-calendar-days"></i></button>
+                            <button class="btn-icon" onclick="resetHabit(${habit.id})"><i class="fa-solid fa-rotate-left"></i></button>
+                            <button class="btn-icon" onclick="deleteHabit(${habit.id})"><i class="fa-solid fa-trash"></i></button>
+                            <button class="btn-icon ${isDoneToday ? 'btn-disabled' : ''}" 
+                                onclick="${isDoneToday ? '' : `incrementHabit(${habit.id})`}" 
+                                style="border-color: var(--primary); color: var(--primary)">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="calendar-${habit.id}" class="calendar-wrapper"></div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // --- CORE FUNCTIONS ---
+        function addHabit() {
+            const input = document.getElementById('habitInput');
+            const name = input.value.trim();
+            if (name) {
+                habits.unshift({ id: Date.now(), name: name, streak: 0, history: [] });
+                saveToCloud();
+                input.value = '';
+            }
+        }
+        function incrementHabit(id) {
+            const habit = habits.find(h => h.id === id);
+            if (habit) {
+                if (!habit.history) habit.history = [];
+                if (habit.history.includes(todayStr)) return;
+                habit.streak += 1;
+                habit.history.push(todayStr);
+                saveToCloud();
+            }
+        }
+        // --- GOD MODE: STREAK EDİTLEME ---
+        function editStreak(id) {
+            const habit = habits.find(h => h.id === id);
+            const newStreak = prompt(`"${habit.name}" için yeni seri sayısını gir:`, habit.streak);
+            if(newStreak !== null && !isNaN(newStreak)) {
+                habit.streak = parseInt(newStreak);
+                saveToCloud();
+            }
+        }
+        
+        function resetHabit(id) {
+            if(confirm('Veriler silinecek. Emin misin?')) {
+                const habit = habits.find(h => h.id === id);
+                habit.streak = 0; habit.history = []; saveToCloud();
+            }
+        }
+        function deleteHabit(id) {
+            if(confirm('Tamamen silinecek. Emin misin?')) {
+                habits = habits.filter(h => h.id !== id); saveToCloud();
+            }
+        }
+        function renameHabit(id) {
+            const h = habits.find(x => x.id === id);
+            const n = prompt("Yeni isim:", h.name);
+            if(n) { h.name = n.trim(); saveToCloud(); }
+        }
+        function handleEnter(e) { if(e.key === 'Enter') addHabit(); }
+
+        // --- CALENDAR ---
+        let currentCalDate = new Date(); 
+        function toggleCalendar(id) {
+            const calDiv = document.getElementById(`calendar-${id}`);
+            if (calDiv.style.display === 'block') {
+                calDiv.style.display = 'none';
+            } else {
+                document.querySelectorAll('.calendar-wrapper').forEach(el => el.style.display = 'none');
+                calDiv.style.display = 'block';
+                renderCalendarHTML(id, currentCalDate.getFullYear(), currentCalDate.getMonth());
+            }
+        }
+        function renderCalendarHTML(habitId, year, month) {
+            const container = document.getElementById(`calendar-${habitId}`);
+            const habit = habits.find(h => h.id === habitId);
+            const firstDay = new Date(year, month, 1).getDay(); 
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthsTR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+            let startDayIndex = firstDay === 0 ? 6 : firstDay - 1;
+
+            let html = `
+                <div class="cal-header">
+                    <button class="cal-nav" onclick="changeMonth(${habitId}, -1)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span>${monthsTR[month]} ${year}</span>
+                    <button class="cal-nav" onclick="changeMonth(${habitId}, 1)"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="cal-day-name">Pzt</div><div class="cal-day-name">Sal</div><div class="cal-day-name">Çar</div>
+                    <div class="cal-day-name">Per</div><div class="cal-day-name">Cum</div><div class="cal-day-name">Cmt</div><div class="cal-day-name">Paz</div>
+            `;
+            for(let i=0; i < startDayIndex; i++) html += `<div class="cal-day"></div>`;
+            for(let day=1; day <= daysInMonth; day++) {
+                const checkDate = new Date(year, month, day);
+                const dateStr = checkDate.toLocaleDateString('en-CA');
+                let classes = 'cal-day current-month';
+                if(dateStr === todayStr) classes += ' today';
+                if(habit.history && habit.history.includes(dateStr)) classes += ' completed';
+                html += `<div class="${classes}">${day}</div>`;
+            }
+            html += `</div>`;
+            container.innerHTML = html;
+            container.dataset.year = year; container.dataset.month = month;
+        }
+        function changeMonth(habitId, direction) {
+            const container = document.getElementById(`calendar-${habitId}`);
+            let year = parseInt(container.dataset.year);
+            let month = parseInt(container.dataset.month);
+            month += direction;
+            if (month > 11) { month = 0; year++; } else if (month < 0) { month = 11; year--; }
+            renderCalendarHTML(habitId, year, month);
+        }
+    </script>
+</body>
+</html>
