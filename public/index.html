@@ -457,6 +457,7 @@
     #addSheet[open] .sheet-item { animation: itemIn .42s cubic-bezier(.2,.9,.25,1.1) both; }
     #addSheet[open] .sheet-item:nth-of-type(2) { animation-delay: 60ms; }
     #addSheet[open] .sheet-item:nth-of-type(3) { animation-delay: 120ms; }
+    #addSheet[open] .sheet-item:nth-of-type(4) { animation-delay: 180ms; }
     @keyframes itemIn { from { opacity: 0; transform: translateY(18px) scale(.96); } }
     #addSheet[open] .sheet-item img { animation: iconSpin .6s cubic-bezier(.2,.9,.25,1.2) both; animation-delay: inherit; }
     @keyframes iconSpin { from { transform: rotate(-25deg) scale(.5); } }
@@ -520,6 +521,11 @@
     .field > label, .field-label { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); margin-bottom: 7px; }
     .field input[type="text"], .field input[type="password"] { width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); outline: none; font-size: 1rem; }
     .field input:focus { border-color: var(--brand); }
+    .field input.invalid { border-color: var(--danger); animation: shake .35s; }
+    .field-err { color: var(--danger); font-size: .78rem; font-weight: 600; margin-top: 6px; animation: rise .25s both; }
+    @keyframes shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+    .focus-btn { width: 40px; height: 40px; flex: none; border-radius: 13px; display: grid; place-items: center; color: color-mix(in srgb, var(--c) 75%, var(--muted)); background: color-mix(in srgb, var(--c) 12%, transparent); margin-right: -4px; }
+    .focus-btn:active { transform: scale(.9); }
     .emojis { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
     .emojis button { aspect-ratio: 1; border-radius: 10px; font-size: 20px; background: var(--surface-2); }
     .emojis button.sel { box-shadow: inset 0 0 0 2px var(--text); }
@@ -631,6 +637,7 @@
     <button class="sheet-item" data-action="add-habit"><img src="img/flame.webp" alt=""><div><b>Alışkanlık</b><span>Her gün ya da belli günlerde yapacağın bir şey</span></div></button>
     <button class="sheet-item" data-action="add-note"><img src="img/brain.webp" alt=""><div><b>Aklıma not</b><span>Unutmak istemediğin bir iş, istersen saatli</span></div></button>
     <button class="sheet-item" data-action="add-goal"><img src="img/target.webp" alt=""><div><b>Hedef</b><span>Ulaşmak istediğin bir sonuç</span></div></button>
+    <button class="sheet-item" data-action="add-focus"><img src="img/flame.webp" alt="" style="filter:hue-rotate(160deg)"><div><b>Odak sayacı</b><span>Bir alışkanlık için süre tut, bitince işaretlensin</span></div></button>
   </dialog>
 
   <!-- Kısayoldan odak: hangi alışkanlık? -->
@@ -682,7 +689,7 @@
 
   <!-- Hedef ekle / düzenle -->
   <dialog id="goalDialog" class="sheet-dlg">
-    <form method="dialog" id="goalForm">
+    <form method="dialog" id="goalForm" novalidate>
       <img class="dlg-art" src="img/target.webp" alt="">
       <h3 id="goalDialogTitle">Yeni hedef</h3>
       <div class="field">
@@ -712,7 +719,7 @@
 
   <!-- Ekle / düzenle -->
   <dialog id="habitDialog" class="sheet-dlg">
-    <form method="dialog" id="habitForm">
+    <form method="dialog" id="habitForm" novalidate>
       <h3 id="habitDialogTitle">Yeni alışkanlık</h3>
       <div class="hpreview" id="hpreview"><div class="emoji"></div><div><b></b><span></span></div></div>
       <div class="field">
@@ -801,7 +808,7 @@
 
   <!-- Şifre -->
   <dialog id="loginDialog">
-    <form id="loginForm" method="dialog">
+    <form id="loginForm" method="dialog" novalidate>
       <h3>Giriş</h3>
       <div class="field">
         <label for="passInput">Uygulama şifresi</label>
@@ -849,6 +856,7 @@
     const MILESTONES = [[3, 'img:sprout'], [7, '⭐'], [14, '💫'], [30, '🏅'], [60, '🥈'], [100, '🥇'], [200, '💎'], [365, '👑']];
     const HEAT_WEEKS = 53;
     const ICON_CHECK = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    const ICON_TIMER = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>';
     const ICON_PLAY = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>';
     const ICON_LEFT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>';
     const ICON_RIGHT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>';
@@ -906,6 +914,27 @@
         }
       });
     }
+
+    // Tarayıcının "Please fill out this field" balonu yerine kendi uyarımız
+    const FIELD_MSG = { goalTitle: 'Hedefine bir isim ver', habitName: 'Alışkanlığa bir isim ver', passInput: 'Şifreni yaz' };
+    document.addEventListener('submit', (e) => {
+      const bad = [...e.target.querySelectorAll('[required]')].filter((i) => !i.value.trim());
+      e.target.querySelectorAll('.field-err').forEach((x) => x.remove());
+      if (!bad.length) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      bad.forEach((i) => {
+        i.classList.remove('invalid'); void i.offsetWidth; i.classList.add('invalid');
+        const m = document.createElement('div'); m.className = 'field-err'; m.textContent = FIELD_MSG[i.id] || 'Bu alanı doldur';
+        i.after(m);
+      });
+      bad[0].focus();
+      if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
+    }, true);
+    document.addEventListener('input', (e) => {
+      if (!e.target.classList.contains('invalid')) return;
+      e.target.classList.remove('invalid');
+      const m = e.target.nextElementSibling; if (m && m.classList.contains('field-err')) m.remove();
+    });
 
     // ---------- Seri hesapları (tek doğru kaynak: history + skips + days) ----------
     // Bir gün üç şekilde olabilir: yapıldı, "nötr" (plan dışı gün ya da izin günü) veya kaçırıldı.
@@ -1332,6 +1361,7 @@
                 <div class="meta">${streak}${extra}</div>
                 <div class="week">${week}</div>
               </div>
+              ${!s.doneToday && !h.minutes ? `<button class="focus-btn" data-action="focus" aria-label="Odak sayacı">${ICON_TIMER}</button>` : ''}
               ${counter && count ? '<button class="minus" data-action="minus" aria-label="Azalt">−</button>' : ''}
               <button class="check${popId === h.id ? ' pop' : ''}${counter && count ? ' partial' : ''}" style="--p:${Math.round((count / h.target) * 100)}" data-action="${timed ? 'timer' : 'check'}" aria-label="${timed ? 'Odak sayacını başlat' : 'Bugünü işaretle'}">${checkInner}</button>
             </div>
@@ -2404,7 +2434,7 @@
       $('#modeInfo').textContent = mode === 'cloud'
         ? 'Verilerin buluta kaydediliyor; tüm cihazlarında aynı.'
         : 'Bulut bağlantısı yok; veriler sadece bu tarayıcıda. Yedek indirmeyi unutma.';
-      $('#modeInfo').textContent += ' · Sürüm 10';
+      $('#modeInfo').textContent += ' · Sürüm 11';
       paintRemind();
       $('#freezeOn').checked = settings.freezeOn !== false;
       $('#settingsDialog').showModal();
@@ -2488,6 +2518,7 @@
         case 'add-menu': $('#addSheet').showModal(); break;
         case 'add-habit': $('#addSheet').close(); openHabitDialog(); break;
         case 'add-goal': $('#addSheet').close(); openGoalDialog(); break;
+        case 'add-focus': $('#addSheet').close(); setTab('bugun'); setTimeout(openFocusPick, 230); break;
         case 'add-note': $('#addSheet').close(); setTab('aklimda'); setTimeout(() => $('#captureText').focus(), 120); break;
         case 'note-open': openNoteId = openNoteId === nid ? null : nid; pickedNoteId = nid; if (brain3d) brain3d.select(nid); renderMind(); break;
         case 'note-snooze': {
