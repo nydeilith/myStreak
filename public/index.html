@@ -191,11 +191,59 @@
     .empty div { font-size: 44px; margin-bottom: 10px; }
     .empty h3 { color: var(--text); font-size: 1.05rem; margin-bottom: 6px; }
 
-    /* Ekle butonu + alt sekmeler */
-    .fab { position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(84px + env(safe-area-inset-bottom)); width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: var(--text); color: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 20; transition: transform .15s; }
+    /* Alt sekmeler + ortadaki ekle butonu */
+    .tab-add { display: grid; place-items: center; }
+    .tab-add span { width: 52px; height: 44px; border-radius: 16px; display: grid; place-items: center; background: var(--text); color: var(--bg); box-shadow: 0 6px 18px rgba(0,0,0,.25); transition: transform .15s; }
+    .tab-add:active span { transform: scale(.92); }
+    .tab svg { width: 26px; height: 26px; margin: 2px 0 2px; opacity: .55; }
+    .tab.active svg { opacity: 1; }
+    dialog.sheet { margin: auto auto 0; width: 100%; max-width: 560px; border-radius: 24px 24px 0 0; padding: 10px 16px calc(18px + env(safe-area-inset-bottom)); animation: sheetUp .25s cubic-bezier(.2,.8,.2,1); }
+    @keyframes sheetUp { from { transform: translateY(40px); opacity: 0; } }
+    .sheet .grab { width: 38px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto 14px; }
+    .sheet h3 { margin: 0 4px 10px; font-size: 1rem; }
+    .sheet-item { width: 100%; display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 16px; text-align: left; }
+    .sheet-item:hover { background: var(--surface-2); }
+    .sheet-item img { width: 46px; height: 46px; object-fit: contain; flex: none; }
+    .sheet-item b { display: block; font-size: .98rem; }
+    .sheet-item span { font-size: .8rem; color: var(--muted); }
+
+    /* 3D beyin sahnesi (her temada koyu: anatomik siyah-beyaz görünüm) */
+    .stage { position: relative; height: min(64vh, 480px); margin: -6px -16px 16px; background: radial-gradient(ellipse at 50% 42%, #10131a 0%, #000 72%); overflow: hidden; color: #e9edf5; }
+    .b3-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
+    .b3-canvas:active { cursor: grabbing; }
+    .stage-head { position: absolute; top: 14px; left: 18px; right: 18px; pointer-events: none; z-index: 3; }
+    .stage-head h2 { font-size: 1.45rem; font-weight: 800; letter-spacing: -.02em; }
+    .stage-head p { font-size: .82rem; color: #9aa3b5; margin-top: 2px; }
+    .stage-hint { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-size: .7rem; color: #6b7385; letter-spacing: .08em; text-transform: uppercase; pointer-events: none; z-index: 3; }
+    .stage .brain-fallback { position: absolute; inset: 0; margin: auto; width: 62%; max-width: 280px; object-fit: contain; animation: float 6s ease-in-out infinite; }
+    .b3-labels { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+    .b3-label { position: absolute; left: 0; top: 0; max-width: 46%; padding: 5px 10px; border-radius: 99px; font-size: .72rem; font-weight: 600; color: #e9edf5; background: rgba(12,14,20,.78); border: 1px solid rgba(255,255,255,.16); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; backdrop-filter: blur(4px); transition: opacity .25s, border-color .2s; will-change: transform; }
+    .b3-label.late { border-color: rgba(245,158,11,.75); color: #fcd34d; }
+    .b3-label.sel { border-color: #34d399; background: rgba(6,40,30,.85); }
+    .stage-pop { position: absolute; left: 12px; right: 12px; bottom: 34px; z-index: 4; background: rgba(18,21,29,.94); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 12px 14px; backdrop-filter: blur(8px); }
+    .stage-pop .note-text { color: #e9edf5; }
+    .stage-pop .note-meta { color: #9aa3b5; }
+    .stage-pop .note-actions { margin-left: 0; }
+    .stage-pop .note-actions button { background: rgba(255,255,255,.08); color: #e9edf5; }
+
+    /* GitHub tarzı aktivite grafiği */
+    .heat-wrap { display: flex; gap: 6px; }
+    .heat-days { display: grid; grid-template-rows: 14px repeat(7, 11px); gap: 3px; font-size: .6rem; color: var(--muted); padding-top: 0; }
+    .heat-scroll { overflow-x: auto; scrollbar-width: none; flex: 1; }
+    .heat-scroll::-webkit-scrollbar { display: none; }
+    .heat-grid { display: grid; grid-template-rows: 14px repeat(7, 11px); grid-auto-flow: column; grid-auto-columns: 11px; gap: 3px; width: max-content; }
+    .heat-grid .m { font-size: .6rem; color: var(--muted); white-space: nowrap; overflow: visible; line-height: 14px; }
+    .heat-grid i { border-radius: 3px; background: var(--surface-2); }
+    .heat-grid i.l1 { background: color-mix(in srgb, var(--brand) 30%, var(--surface-2)); }
+    .heat-grid i.l2 { background: color-mix(in srgb, var(--brand) 55%, var(--surface-2)); }
+    .heat-grid i.l3 { background: color-mix(in srgb, var(--brand) 80%, var(--surface-2)); }
+    .heat-grid i.l4 { background: var(--brand); }
+    .heat-grid i.future { visibility: hidden; }
+    .heat-grid i.today { outline: 1.5px solid var(--text); outline-offset: 1px; }
+    .fab { display: none !important; position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(84px + env(safe-area-inset-bottom)); width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: var(--text); color: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 20; transition: transform .15s; }
     .fab:active { transform: scale(.94); }
     .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--border); padding: 4px 12px env(safe-area-inset-bottom); }
-    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 560px; margin: 0 auto; }
+    .tabs { display: grid; grid-template-columns: repeat(5, 1fr); max-width: 560px; margin: 0 auto; }
     .tab { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 0 8px; font-size: .7rem; font-weight: 600; color: var(--muted); position: relative; }
     .tab img { width: 30px; height: 30px; object-fit: contain; filter: grayscale(.9) opacity(.5); transition: filter .2s, transform .2s; }
     .tab.active { color: var(--text); }
@@ -347,9 +395,6 @@
       </div>
       <div class="top-actions">
         <span class="sync" id="sync" data-s="loading"><i></i><span>Yükleniyor</span></span>
-        <button class="icon-btn" data-action="settings" aria-label="Ayarlar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
       </div>
     </header>
 
@@ -361,9 +406,11 @@
     </main>
 
     <main id="view-aklimda" hidden>
-      <section class="hero">
-        <img class="brain" id="brain" src="img/brain.webp" alt="" data-action="focus-capture">
-        <div><h2>Aklımda</h2><p id="mindSub"></p></div>
+      <section class="stage" id="brainStage">
+        <img class="brain brain-fallback" id="brain" src="img/brain.webp" alt="">
+        <div class="stage-head"><h2>Aklımda</h2><p id="mindSub"></p></div>
+        <div class="stage-hint" id="stageHint">Sürükle ve çevir</div>
+        <div class="stage-pop" id="stagePop" hidden></div>
       </section>
       <form class="card capture" id="captureForm" autocomplete="off">
         <div class="capture-row">
@@ -395,9 +442,20 @@
     <div class="tabs">
       <button class="tab" data-tab="bugun"><img src="img/flame.webp" alt="">Bugün</button>
       <button class="tab" data-tab="aklimda"><img src="img/brain.webp" alt="">Aklımda<span class="count" id="mindCount" hidden></span></button>
+      <button class="tab-add" data-action="add-menu" aria-label="Ekle"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
       <button class="tab" data-tab="hedefler"><img src="img/target.webp" alt="">Hedefler</button>
+      <button class="tab" data-action="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Ayarlar</button>
     </div>
   </nav>
+
+  <!-- Ortadaki + menüsü -->
+  <dialog id="addSheet" class="sheet">
+    <div class="grab"></div>
+    <h3>Ne eklemek istersin?</h3>
+    <button class="sheet-item" data-action="add-habit"><img src="img/flame.webp" alt=""><div><b>Alışkanlık</b><span>Her gün ya da belli günlerde yapacağın bir şey</span></div></button>
+    <button class="sheet-item" data-action="add-note"><img src="img/brain.webp" alt=""><div><b>Aklıma not</b><span>Unutmak istemediğin bir iş, istersen saatli</span></div></button>
+    <button class="sheet-item" data-action="add-goal"><img src="img/target.webp" alt=""><div><b>Hedef</b><span>Ulaşmak istediğin bir sonuç</span></div></button>
+  </dialog>
 
   <!-- Hedef ekle / düzenle -->
   <dialog id="goalDialog">
@@ -540,7 +598,7 @@
     const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];                          // ekranda Pazartesi başlar
     const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
     const MILESTONES = [[3, 'img:sprout'], [7, '⭐'], [14, '💫'], [30, '🏅'], [60, '🥈'], [100, '🥇'], [200, '💎'], [365, '👑']];
-    const HEAT_WEEKS = 18;
+    const HEAT_WEEKS = 53;
     const ICON_CHECK = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
     const ICON_LEFT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>';
     const ICON_RIGHT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>';
@@ -626,6 +684,15 @@
       if (c && typeof c === 'object') for (const [k, v] of Object.entries(c)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && v > 0) out[k] = Math.min(999, v | 0);
       return out;
     }
+    // Önceki sürüm simge adını 8 karakterde kesiyordu ("img:books" -> "img:book"); kesilmiş adları onar
+    function fixEmoji(e) {
+      if (typeof e !== 'string' || !e) return '🔥';
+      if (!e.startsWith('img:')) return e.slice(0, 8);
+      const name = e.slice(4);
+      if (IMAGE_ICONS[name]) return e;
+      const full = Object.keys(IMAGE_ICONS).find((k) => k.startsWith(name));
+      return full ? 'img:' + full : '🔥';
+    }
     function runEndingAt(set, date) { let n = 0; for (let d = date; set.has(keyOf(d)); d = addDays(d, -1)) n++; return n; }
     function normalize(raw) {
       const list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.habits) ? raw.habits : []);
@@ -648,7 +715,7 @@
         const created = Number(h.createdAt) || (id > 1e12 && id < 1e13 ? id : Date.now());
         return {
           id, name: h.name.trim().slice(0, 60),
-          emoji: typeof h.emoji === 'string' && h.emoji ? h.emoji.slice(0, 8) : '🔥',
+          emoji: fixEmoji(h.emoji),
           color: /^#[0-9a-f]{6}$/i.test(h.color) ? h.color : COLORS[i % COLORS.length],
           days: days.length ? days : ALL_DAYS.slice(),
           target: Math.min(99, Math.max(1, parseInt(h.target, 10) || 1)),
@@ -687,7 +754,7 @@
     }
     const needsMigration = (raw) => {
       const list = Array.isArray(raw) ? raw : (raw && raw.habits) || [];
-      return list.some((h) => h && ('streak' in h || !h.color || !h.createdAt || !h.days));
+      return list.some((h) => h && ('streak' in h || !h.color || !h.createdAt || !h.days || fixEmoji(h.emoji) !== h.emoji));
     };
 
     // ---------- Senkronizasyon ----------
@@ -963,12 +1030,18 @@
       const collapsed = store.get(K.overview) === 'closed';
       el.classList.toggle('collapsed', collapsed);
       const today = dayStart(new Date());
-      const lastCol = addDays(today, (7 - ((today.getDay() + 6) % 7)) - 1); // bu haftanın Pazarı
-      const first = addDays(lastCol, -(HEAT_WEEKS * 7 - 1));
+      const lastCol = addDays(today, 6 - ((today.getDay() + 6) % 7)); // bu haftanın Pazarı
+      const first = addDays(lastCol, -(HEAT_WEEKS * 7 - 1));           // 53 hafta önceki Pazartesi
       const starts = all.map(([h]) => startOf(h));
-      let cells = '', perfect = 0, checks = 0, weekHit = 0, weekDue = 0;
       const weekStart = addDays(today, -((today.getDay() + 6) % 7));
+      let cells = '', perfect = 0, active = 0, weekHit = 0, weekDue = 0, lastMonth = -1;
       for (let d = first; d <= lastCol; d = addDays(d, 1)) {
+        // Her haftanın başında (Pazartesi) ay etiketi hücresi
+        if (d.getDay() === 1) {
+          const m = d.getMonth(), show = m !== lastMonth && d.getDate() <= 7;
+          if (show) lastMonth = m;
+          cells += `<span class="m">${show ? MONTHS[m].slice(0, 3) : ''}</span>`;
+        }
         if (d > today) { cells += '<i class="future"></i>'; continue; }
         let dueN = 0, doneN = 0;
         all.forEach(([h, s], i) => {
@@ -976,25 +1049,29 @@
           const st = dayState(h, s.sets, d);
           if (st === 'on') { doneN++; dueN++; } else if (st === 'miss') dueN++;
         });
-        checks += doneN;
         const isToday = d.getTime() === today.getTime();
         if (d >= weekStart) { weekHit += doneN; weekDue += isToday ? doneN : dueN; }
+        if (doneN) active++;
         if (dueN && doneN >= dueN) perfect++;
         const lvl = !dueN || !doneN ? 0 : Math.max(1, Math.round((doneN / dueN) * 4));
         cells += `<i class="l${lvl}${isToday ? ' today' : ''}" title="${d.getDate()} ${MONTHS[d.getMonth()]}: ${doneN}/${dueN}"></i>`;
       }
       const weekPct = weekDue ? Math.round((weekHit / weekDue) * 100) : 0;
       el.innerHTML = `
-        <div class="ov-head"><h3>Genel görünüm</h3><button data-action="toggle-overview">${collapsed ? 'Göster' : 'Gizle'}</button></div>
+        <div class="ov-head"><h3>Son bir yıl</h3><button data-action="toggle-overview">${collapsed ? 'Göster' : 'Gizle'}</button></div>
         <div class="ov-body">
           <div class="ov-nums">
             <div><b>%${weekPct}</b><span>Bu hafta</span></div>
+            <div><b>${active}</b><span>Aktif gün</span></div>
             <div><b>${perfect}</b><span>Tam gün</span></div>
-            <div><b>${checks}</b><span>Toplam ✓</span></div>
           </div>
-          <div class="heat">${cells}</div>
-          <div class="legend">Az <i class="l0" style="background:var(--surface-2)"></i><i style="background:color-mix(in srgb,var(--brand) 30%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--brand) 55%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--brand) 80%,var(--surface-2))"></i><i style="background:var(--brand)"></i> Çok</div>
+          <div class="heat-wrap">
+            <div class="heat-days"><span></span><span>Pzt</span><span></span><span>Çar</span><span></span><span>Cum</span><span></span><span></span></div>
+            <div class="heat-scroll" id="heatScroll"><div class="heat-grid">${cells}</div></div>
+          </div>
+          <div class="legend">Az <i style="background:var(--surface-2)"></i><i style="background:color-mix(in srgb,var(--brand) 30%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--brand) 55%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--brand) 80%,var(--surface-2))"></i><i style="background:var(--brand)"></i> Çok</div>
         </div>`;
+      const sc = $('#heatScroll'); if (sc) sc.scrollLeft = sc.scrollWidth; // en yeni haftalar görünsün
     }
 
     function detailsHTML(h, s, idx) {
@@ -1050,6 +1127,8 @@
       tab = t;
       history.replaceState(null, '', '#' + t);
       renderTabs();
+      if (t === 'aklimda') ensureBrain();
+      if (brain3d) brain3d.setVisible(t === 'aklimda');
       window.scrollTo(0, 0);
     }
     function renderTabs() {
@@ -1089,6 +1168,8 @@
       const planned = open.filter((n) => n.remindAt && n.remindAt > Date.now()).length;
       // Beyin, aklındaki şey arttıkça doygunlaşır ve parlar
       $('#brain').style.setProperty('--load', Math.min(1, open.length / 7).toFixed(2));
+      if (brain3d) brain3d.setNotes(open.map((n) => ({ id: n.id, text: n.text, late: !!(n.remindAt && n.remindAt <= Date.now()) })));
+      renderStagePop();
       $('#mindSub').textContent = open.length
         ? `${open.length} şey aklında${planned ? ` · ${planned} hatırlatma kurulu` : ''}`
         : 'Zihnin berrak. Aklına bir şey gelince buraya bırak.';
@@ -1111,6 +1192,31 @@
         <div class="section-title" style="margin-top:22px"><span>Tamamlananlar · ${done.length}</span><button data-action="notes-clear">Temizle</button></div>
         <ul class="notes">${done.slice(0, 20).map(item).join('')}</ul>` : '';
     }
+    // 3D sahne: Aklımda sekmesi ilk açıldığında yüklenir (three.js ~170 KB sıkıştırılmış)
+    let brain3d = null, brainLoading = false, pickedNoteId = null;
+    function ensureBrain() {
+      if (brain3d || brainLoading) return;
+      brainLoading = true;
+      import('./js/brain3d.js').then((m) => {
+        brain3d = m.mountBrain($('#brainStage'), { onPick: (id) => { pickedNoteId = id; renderStagePop(); } });
+        if (!brain3d) return;
+        $('#brain').hidden = true;
+        renderMind();
+        brain3d.setVisible(tab === 'aklimda' && !document.hidden);
+      }).catch((e) => console.error('3D yüklenemedi', e));
+    }
+    function renderStagePop() {
+      const pop = $('#stagePop');
+      const n = pickedNoteId && findNote(pickedNoteId);
+      if (!n || n.doneAt) { pop.hidden = true; pickedNoteId = null; $('#stageHint').hidden = false; return; }
+      const late = n.remindAt && n.remindAt <= Date.now();
+      pop.hidden = false;
+      $('#stageHint').hidden = true;
+      pop.dataset.nid = n.id;
+      pop.innerHTML = `<div class="note-text">${esc(n.text)}</div>
+        <div class="note-meta">${n.remindAt ? `${late ? 'Zamanı geldi · ' : 'Hatırlatma · '}${formatWhen(n.remindAt)}` : `Eklendi · ${formatWhen(n.createdAt)}`}</div>
+        <div class="note-actions"><button data-action="note-toggle">Yaptım</button><button data-action="note-snooze" data-min="60">1 saat ertele</button><button data-action="note-delete" class="danger">Sil</button><button data-action="pop-close">Kapat</button></div>`;
+    }
     function addNote(e) {
       e.preventDefault();
       const text = $('#captureText').value.trim().slice(0, 280);
@@ -1129,6 +1235,7 @@
       commit();
     }
     $('#captureForm').addEventListener('submit', addNote);
+    $('#addSheet').addEventListener('click', (e) => { if (e.target.id === 'addSheet') e.target.close(); });
     $('#whenChips').addEventListener('click', (e) => {
       const b = e.target.closest('[data-when]'); if (!b) return;
       noteWhen = b.dataset.when;
@@ -1140,7 +1247,8 @@
       const n = findNote(id); if (!n) return;
       if (n.doneAt) { n.doneAt = null; return commit(); }
       n.doneAt = Date.now();
-      li.classList.add('done', 'leaving');
+      if (li && !li.classList.contains('stage-pop')) li.classList.add('done', 'leaving');
+      if (pickedNoteId === id) pickedNoteId = null;
       if (navigator.vibrate) navigator.vibrate(10);
       setTimeout(commit, 280);
     }
@@ -1467,7 +1575,7 @@
       $('#modeInfo').textContent = mode === 'cloud'
         ? 'Verilerin buluta kaydediliyor; tüm cihazlarında aynı.'
         : 'Bulut bağlantısı yok; veriler sadece bu tarayıcıda. Yedek indirmeyi unutma.';
-      $('#modeInfo').textContent += ' · Sürüm 5';
+      $('#modeInfo').textContent += ' · Sürüm 6';
       paintRemind();
       $('#settingsDialog').showModal();
     }
@@ -1518,7 +1626,12 @@
       const goalLi = el.closest('[data-gid]'), gid = goalLi ? Number(goalLi.dataset.gid) : null;
       switch (el.dataset.action) {
         case 'note-toggle': toggleNote(nid, noteLi); break;
-        case 'note-open': openNoteId = openNoteId === nid ? null : nid; renderMind(); break;
+        case 'pop-close': pickedNoteId = null; renderStagePop(); break;
+        case 'add-menu': $('#addSheet').showModal(); break;
+        case 'add-habit': $('#addSheet').close(); openHabitDialog(); break;
+        case 'add-goal': $('#addSheet').close(); openGoalDialog(); break;
+        case 'add-note': $('#addSheet').close(); setTab('aklimda'); setTimeout(() => $('#captureText').focus(), 120); break;
+        case 'note-open': openNoteId = openNoteId === nid ? null : nid; pickedNoteId = nid; if (brain3d) brain3d.select(nid); renderMind(); break;
         case 'note-snooze': {
           const n = findNote(nid);
           n.remindAt = el.dataset.min === 'tomorrow' ? atTime(1, 9) : Date.now() + Number(el.dataset.min) * 60e3;
@@ -1590,11 +1703,13 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState !== 'visible') return;
       refreshIfNewDay();
+      if (brain3d) brain3d.setVisible(tab === 'aklimda');
       if (mode === 'cloud' && !store.get(K.dirty) && !saveTimer) load();
     });
 
     if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('/sw.js').catch(console.error);
     load();
+    if (tab === 'aklimda') ensureBrain();
   </script>
 </body>
 </html>

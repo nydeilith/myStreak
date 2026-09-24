@@ -1,5 +1,5 @@
 // myStreak service worker: çevrimdışı açılış + bildirimler
-const CACHE = 'mystreak-v6';
+const CACHE = 'mystreak-v7';
 const AUTH = 'mystreak-auth';
 const ASSETS = ['/', '/manifest.webmanifest', '/icon-192.png', '/img/flame.webp', '/img/brain.webp', '/img/target.webp', '/img/sprout.webp', '/img/snowflake.webp'];
 
