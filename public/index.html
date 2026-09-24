@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <script>
     // Tema, ilk boyamadan önce uygulanır (yanıp sönme olmasın)
     try { const t = localStorage.getItem('mystreak_theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
@@ -25,7 +25,8 @@
     :root {
       --bg: #f5f6fa; --surface: #ffffff; --surface-2: #eef0f6; --text: #0f172a; --muted: #667085;
       --border: #e4e7ef; --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 16px rgba(16,24,40,.06);
-      --brand: #f97316; --danger: #ef4444; --ok: #22c55e; --warn: #f59e0b;
+      --brand: #f97316; --danger: #ef4444; --ok: #22c55e; --warn: #f59e0b; --heat: #22c55e;
+      --display: 'Bricolage Grotesque', 'DM Sans', system-ui, sans-serif;
       --radius: 18px; color-scheme: light;
     }
     @media (prefers-color-scheme: dark) {
@@ -42,7 +43,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-text-size-adjust: 100%; }
     body {
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
       background: var(--bg); color: var(--text); min-height: 100vh; -webkit-tap-highlight-color: transparent;
       padding: max(16px, env(safe-area-inset-top)) 16px calc(170px + env(safe-area-inset-bottom));
     }
@@ -50,6 +51,7 @@
     input { font: inherit; color: inherit; }
     svg { display: block; }
     [hidden] { display: none !important; }
+    .brand h1, .summary h2, .hero h2, .stage-head h2, dialog h3, .ob h2, .stat b, .ov-nums b, .goal-nums b, .cal-head .mt, .ring span, .ov-head h3, .timer-time, .mood h3, .notice b { font-family: var(--display); letter-spacing: -.02em; }
     .app { max-width: 560px; margin: 0 auto; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
 
@@ -76,7 +78,7 @@
     .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
     .ring circle { fill: none; stroke-width: 8; }
     .ring .track { stroke: var(--surface-2); }
-    .ring .bar { stroke: var(--brand); stroke-linecap: round; transition: stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1); }
+    .ring .bar { stroke-linecap: round; transition: stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1); }
     .ring span { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; font-size: 1.05rem; }
     .summary h2 { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
     .summary p { font-size: .88rem; color: var(--muted); line-height: 1.4; }
@@ -92,10 +94,10 @@
     .ov-nums span { font-size: .66rem; color: var(--muted); font-weight: 600; }
     .heat { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 3px; }
     .heat i { aspect-ratio: 1; border-radius: 3px; background: var(--surface-2); }
-    .heat i.l1 { background: color-mix(in srgb, var(--brand) 30%, var(--surface-2)); }
-    .heat i.l2 { background: color-mix(in srgb, var(--brand) 55%, var(--surface-2)); }
-    .heat i.l3 { background: color-mix(in srgb, var(--brand) 80%, var(--surface-2)); }
-    .heat i.l4 { background: var(--brand); }
+    .heat i.l1 { background: color-mix(in srgb, var(--heat) 30%, var(--surface-2)); }
+    .heat i.l2 { background: color-mix(in srgb, var(--heat) 55%, var(--surface-2)); }
+    .heat i.l3 { background: color-mix(in srgb, var(--heat) 80%, var(--surface-2)); }
+    .heat i.l4 { background: var(--heat); }
     .heat i.future { visibility: hidden; }
     .heat i.today { outline: 1.5px solid var(--text); outline-offset: 1px; }
     .legend { display: flex; justify-content: flex-end; align-items: center; gap: 3px; margin-top: 8px; font-size: .66rem; color: var(--muted); }
@@ -106,6 +108,28 @@
     .ov-body > .ov-inner { min-height: 0; overflow: hidden; }
     .overview.collapsed .ov-head { margin-bottom: 0; }
 
+    .notice { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 12px; border-radius: var(--radius); background: color-mix(in srgb, var(--c, #7dd3fc) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c, #7dd3fc) 30%, var(--border)); animation: rise .45s cubic-bezier(.2,.8,.2,1) both; }
+    .notice img { width: 40px; height: 40px; object-fit: contain; flex: none; }
+    .notice div { flex: 1; font-size: .84rem; color: var(--muted); line-height: 1.4; }
+    .notice b { display: block; color: var(--text); font-size: .95rem; }
+    .notice button { flex: none; font-size: .8rem; font-weight: 700; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); }
+    /* Ruh hali */
+    .mood { padding: 14px 16px; margin-bottom: 12px; }
+    .mood-top { display: flex; flex-direction: column; gap: 12px; }
+    .mood-top > div:first-child { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .mood h3 { font-size: 1rem; }
+    .mood small { color: var(--muted); font-size: .76rem; }
+    .faces { display: flex; justify-content: space-between; gap: 6px; }
+    .face { width: 46px; height: 46px; font-size: 24px !important; border-radius: 50%; font-size: 20px; display: grid; place-items: center; background: var(--surface-2); filter: grayscale(.8); opacity: .7; transition: transform .2s, filter .2s, opacity .2s, background .2s; }
+    .face.sel { filter: none; opacity: 1; transform: scale(1.15); background: color-mix(in srgb, var(--mc) 30%, var(--surface-2)); box-shadow: 0 0 0 2px var(--mc); }
+    .face:active { transform: scale(.9); }
+    .mood input { width: 100%; margin-top: 12px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); outline: none; font-size: .92rem; }
+    .insight { margin-top: 10px; font-size: .8rem; color: var(--muted); line-height: 1.45; }
+    .insight b { color: var(--text); }
+    .ov-mode { display: flex; background: var(--surface-2); border-radius: 10px; padding: 3px; }
+    .ov-mode button { padding: 5px 10px; border-radius: 8px; font-size: .74rem; font-weight: 700; color: var(--muted); }
+    .ov-mode button.sel { background: var(--surface); color: var(--text); }
+    .ov-actions { display: flex; align-items: center; gap: 8px; }
     .section-title { display: flex; justify-content: space-between; align-items: baseline; margin: 0 4px 10px; font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 
     /* Habit card */
@@ -129,6 +153,9 @@
     .t3 .streak-num { color: #f97316; } .t4 .streak-num { color: #818cf8; }
     @keyframes flicker { 0%,100% { transform: scale(1) rotate(-2deg); } 50% { transform: scale(1.12) rotate(3deg); } }
     .habit.t3 .emoji, .habit.t4 .emoji { box-shadow: 0 0 0 2px var(--c), 0 0 18px color-mix(in srgb, var(--c) 55%, transparent); }
+    .check .tmin { position: absolute; bottom: 3px; font-size: .56rem; font-weight: 800; letter-spacing: .02em; }
+    .check svg + .tmin { opacity: .9; }
+    .check:has(.tmin) svg { margin-top: -8px; }
     .check .count { font-weight: 800; font-size: .9rem; color: var(--text); }
     .check.partial { background: conic-gradient(color-mix(in srgb, var(--c) 35%, transparent) calc(var(--p) * 1%), transparent 0); }
     .minus { width: 28px; height: 28px; flex: none; border-radius: 9px; display: grid; place-items: center; background: var(--surface-2); color: var(--muted); font-weight: 800; margin-right: -6px; }
@@ -202,6 +229,9 @@
     .cd button.on { background: var(--c); color: #fff; font-weight: 800; box-shadow: 0 3px 10px color-mix(in srgb, var(--c) 40%, transparent); }
     .cd button.skip { background: none; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 55%, transparent); color: var(--muted); }
     .cd button.skip::after { content: ''; position: absolute; right: -3px; top: -3px; width: 13px; height: 13px; background: url(img/snowflake.webp) center / contain no-repeat; }
+    .cd button.frz { background: color-mix(in srgb, #7dd3fc 22%, transparent); color: #7dd3fc; }
+    .cd button.frz::after { content: ''; position: absolute; right: -3px; top: -3px; width: 13px; height: 13px; background: url(img/snowflake.webp) center / contain no-repeat; }
+    .day.frz b { background: color-mix(in srgb, #7dd3fc 45%, var(--surface-2)); }
     .cd button.today { box-shadow: inset 0 0 0 2px var(--text); }
     .cd button.on.today { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--c); }
     .cd button:disabled { color: var(--muted); opacity: .3; cursor: default; }
@@ -214,7 +244,7 @@
     .btn:hover:not(:disabled) { filter: brightness(.97); }
     .btn:disabled { opacity: .4; cursor: default; }
     .btn.danger { color: var(--danger); }
-    .btn.primary { background: var(--brand); color: #fff; }
+    .btn.primary { background: var(--text); color: var(--bg); }
     .btn.small { flex: none; padding: 8px 12px; font-size: .8rem; }
 
     /* Empty */
@@ -262,10 +292,10 @@
     .heat-grid { display: grid; grid-template-rows: 14px repeat(7, 11px); grid-auto-flow: column; grid-auto-columns: 11px; gap: 3px; width: max-content; }
     .heat-grid .m { font-size: .6rem; color: var(--muted); white-space: nowrap; overflow: visible; line-height: 14px; }
     .heat-grid i { border-radius: 3px; background: var(--surface-2); }
-    .heat-grid i.l1 { background: color-mix(in srgb, var(--brand) 30%, var(--surface-2)); }
-    .heat-grid i.l2 { background: color-mix(in srgb, var(--brand) 55%, var(--surface-2)); }
-    .heat-grid i.l3 { background: color-mix(in srgb, var(--brand) 80%, var(--surface-2)); }
-    .heat-grid i.l4 { background: var(--brand); }
+    .heat-grid i.l1 { background: color-mix(in srgb, var(--heat) 30%, var(--surface-2)); }
+    .heat-grid i.l2 { background: color-mix(in srgb, var(--heat) 55%, var(--surface-2)); }
+    .heat-grid i.l3 { background: color-mix(in srgb, var(--heat) 80%, var(--surface-2)); }
+    .heat-grid i.l4 { background: var(--heat); }
     .heat-grid i.future { visibility: hidden; }
     .heat-grid i.today { outline: 1.5px solid var(--text); outline-offset: 1px; }
     .fab { display: none !important; position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(84px + env(safe-area-inset-bottom)); width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: var(--text); color: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 20; transition: transform .15s; }
@@ -419,6 +449,49 @@
     #habitDialog .btn.primary { background: var(--c, var(--brand)); transition: background .3s; }
     #habitDialog[open] .hpreview { animation: rise .45s .08s cubic-bezier(.2,.9,.25,1.1) both; }
     #loginDialog { --in: popIn; }
+    /* Odak sayacı: alışkanlığın renginde tam ekran */
+    #timer { position: fixed; inset: 0; z-index: 85; background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--c) 38%, #0b0d12) 0%, #07080b 70%); color: #f2f4f8; display: grid; place-items: center; padding: max(20px, env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)); animation: timerIn .5s cubic-bezier(.2,.9,.25,1) both; }
+    #timer.closing { animation: timerOut .3s ease-in both; }
+    @keyframes timerIn { from { opacity: 0; transform: scale(1.06); } }
+    @keyframes timerOut { to { opacity: 0; transform: scale(.96); } }
+    .timer-in { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+    .timer-top { display: flex; align-items: center; gap: 12px; align-self: stretch; }
+    .timer-top .emoji { background: rgba(255,255,255,.08); }
+    .timer-top b { display: block; font-size: 1.05rem; }
+    .timer-top span { font-size: .8rem; color: rgba(255,255,255,.6); }
+    .timer-ring { position: relative; width: min(78vw, 300px); aspect-ratio: 1; }
+    .timer-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .tr-track { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 10; }
+    .tr-bar { fill: none; stroke: var(--c); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s linear; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--c) 60%, transparent)); }
+    .timer-time { position: absolute; inset: 0; display: grid; place-items: center; font-size: 4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .timer-state { position: absolute; left: 0; right: 0; bottom: 26%; text-align: center; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+    #timer.paused .timer-time { animation: blink 1.4s ease-in-out infinite; }
+    @keyframes blink { 50% { opacity: .35; } }
+    .timer-actions { display: flex; gap: 10px; align-self: stretch; }
+    .timer-actions .btn { padding: 15px; font-size: 1rem; background: rgba(255,255,255,.08); color: #f2f4f8; }
+    .timer-actions .btn.primary { background: #f2f4f8; color: #0b0d12; }
+    .timer-skip { font-size: .82rem; color: rgba(255,255,255,.55); text-decoration: underline; text-underline-offset: 3px; }
+    /* Aylık özet kartı */
+    #monthDialog img.mc-img { width: 100%; border-radius: 18px; display: block; aspect-ratio: 9 / 16; object-fit: cover; background: #0b0d12; }
+    #monthDialog .mc-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    #monthDialog .mc-nav b { font-family: var(--display); font-size: 1.1rem; }
+    #monthDialog .mc-nav button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); display: grid; place-items: center; }
+    /* Kendi tarih seçicimiz */
+    .date-field { width: 100%; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); font-size: 1rem; color: var(--text); display: flex; align-items: center; gap: 10px; }
+    .date-field::before { content: ''; width: 18px; height: 18px; flex: none; background: currentColor; opacity: .55; -webkit-mask: var(--cal-ico) center / contain no-repeat; mask: var(--cal-ico) center / contain no-repeat; }
+    .date-field.empty { color: var(--muted); }
+    :root { --cal-ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E"); }
+    #datePicker { --c: var(--text); }
+    #datePicker .dp-quick { margin: -6px 0 12px; }
+    #datePicker .cd button.sel { background: var(--text); color: var(--bg); font-weight: 800; }
+    #datePicker .cd button.future, #datePicker .cd button.miss { color: var(--text); }
+    .dp-time { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 16px 0 4px; }
+    .dp-wheel { display: flex; align-items: center; gap: 4px; background: var(--surface-2); border-radius: 16px; padding: 4px; }
+    .dp-wheel button { width: 40px; height: 44px; border-radius: 12px; font-size: 1.3rem; font-weight: 700; color: var(--muted); }
+    .dp-wheel button:active { background: var(--surface); }
+    .dp-wheel b { font-family: var(--display); font-size: 1.7rem; min-width: 46px; text-align: center; font-variant-numeric: tabular-nums; }
+    .dp-colon { font-family: var(--display); font-size: 1.6rem; font-weight: 800; color: var(--muted); }
+    .dp-result { text-align: center; color: var(--muted); font-size: .85rem; margin: 10px 0 4px; min-height: 1.2em; }
     dialog h3 { font-size: 1.15rem; margin-bottom: 16px; }
     .field { margin-bottom: 18px; }
     .field > label, .field-label { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); margin-bottom: 7px; }
@@ -480,6 +553,8 @@
 
     <main id="view-bugun">
       <section class="card summary" id="summary" style="--i:0"></section>
+      <section id="notices"></section>
+      <section class="card mood" id="moodCard" style="--i:1"></section>
       <section class="card overview" id="overview" style="--i:1"></section>
       <div class="section-title" id="listTitle"></div>
       <ul class="habits" id="habits"></ul>
@@ -487,7 +562,6 @@
 
     <main id="view-aklimda" hidden>
       <section class="stage" id="brainStage">
-        <img class="brain brain-fallback" id="brain" src="img/brain.webp" alt="">
         <div class="stage-head"><h2>Aklımda</h2><p id="mindSub"></p></div>
         <div class="stage-hint" id="stageHint">Sürükle ve çevir</div>
         <div class="stage-pop" id="stagePop" hidden></div>
@@ -498,7 +572,6 @@
           <button type="submit" class="send">Bırak</button>
         </div>
         <div class="chips" id="whenChips"></div>
-        <input type="datetime-local" id="whenCustom" hidden>
       </form>
       <ul class="notes" id="notes"></ul>
       <div id="doneNotes"></div>
@@ -536,6 +609,35 @@
     <button class="sheet-item" data-action="add-goal"><img src="img/target.webp" alt=""><div><b>Hedef</b><span>Ulaşmak istediğin bir sonuç</span></div></button>
   </dialog>
 
+  <!-- Aylık özet kartı -->
+  <dialog id="monthDialog" class="sheet-dlg">
+    <div class="mc-nav"><button type="button" data-mc="-1" aria-label="Önceki ay"></button><b id="mcTitle"></b><button type="button" data-mc="1" aria-label="Sonraki ay"></button></div>
+    <img class="mc-img" id="mcImg" alt="Aylık özet">
+    <div class="dialog-actions" style="margin-top:14px">
+      <button type="button" class="btn" data-action="close-dialog">Kapat</button>
+      <button type="button" class="btn primary" data-action="month-share">Paylaş / İndir</button>
+    </div>
+  </dialog>
+
+  <!-- Tarih / saat seçici (tarayıcının kendi penceresi yerine) -->
+  <dialog id="datePicker" class="sheet-dlg">
+    <h3 id="dpTitle">Tarih seç</h3>
+    <div class="chips dp-quick" id="dpQuick"></div>
+    <div class="cal-head"><div class="mt" id="dpMonth"></div>
+      <button type="button" data-dp-nav="-1" aria-label="Önceki ay"></button><button type="button" data-dp-nav="1" aria-label="Sonraki ay"></button></div>
+    <div class="cal dp-grid" id="dpGrid"></div>
+    <div class="dp-time" id="dpTime">
+      <div class="dp-wheel"><button type="button" data-dp-h="-1">−</button><b id="dpH">20</b><button type="button" data-dp-h="1">+</button></div>
+      <span class="dp-colon">:</span>
+      <div class="dp-wheel"><button type="button" data-dp-m="-5">−</button><b id="dpM">00</b><button type="button" data-dp-m="5">+</button></div>
+    </div>
+    <p class="dp-result" id="dpResult"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" data-dp-clear>Temizle</button>
+      <button type="button" class="btn primary" data-dp-ok>Tamam</button>
+    </div>
+  </dialog>
+
   <!-- Hedef ekle / düzenle -->
   <dialog id="goalDialog" class="sheet-dlg">
     <form method="dialog" id="goalForm">
@@ -556,7 +658,7 @@
       </div>
       <div class="field">
         <label for="goalDeadline" class="field-label">Bitiş tarihi (isteğe bağlı)</label>
-        <input type="date" id="goalDeadline">
+        <button type="button" class="date-field" id="goalDeadline" data-action="pick-deadline" data-value=""></button>
       </div>
       <div class="dialog-actions">
         <button type="button" class="btn danger" data-action="goal-delete" id="goalDeleteBtn" hidden>Sil</button>
@@ -596,7 +698,11 @@
           <input type="number" id="habitBackfill" min="0" max="3650" placeholder="0" inputmode="numeric">
         </div>
       </div>
-      <p class="hint" style="margin-top:-10px">Hedef 1 ise tek dokunuş yeter; 8 yazarsan günde 8 kez (ör. 8 bardak su) sayar.
+      <div class="field">
+        <label for="habitMinutes" class="field-label">Odak süresi (dakika, isteğe bağlı)</label>
+        <input type="number" id="habitMinutes" min="0" max="240" placeholder="ör. 20" inputmode="numeric">
+      </div>
+      <p class="hint" style="margin-top:-10px">Hedef 1 ise tek dokunuş yeter; 8 yazarsan günde 8 kez (ör. 8 bardak su) sayar. Odak süresi girersen işaret butonu sayacı başlatır, süre bitince otomatik işaretlenir.
         "Kaç gündür" kısmına eski serini yaz: dünden geriye o kadar gün yapıldı sayılır, bugünden itibaren işaretlemeye devam edersin.</p>
       <div class="dialog-actions">
         <button type="button" class="btn" data-action="close-dialog">Vazgeç</button>
@@ -622,6 +728,13 @@
         <p class="hint" id="remindInfo"></p>
         <button class="btn" data-action="test-push" id="testPushBtn" hidden>Test bildirimi gönder</button>
       </div>
+    </div>
+    <div class="field">
+      <span class="field-label">Seri koruyucu</span>
+      <div class="remind"><div class="remind-row">
+        <label class="switch"><input type="checkbox" id="freezeOn"><span></span></label>
+        <span style="flex:1">Ayda 2 kaçırılan günü otomatik koru</span></div>
+        <p class="hint">Aktif serin varken planlı bir günü kaçırırsan, seri bozulmaz; o gün takvimde kar tanesiyle görünür.</p></div>
     </div>
     <div class="field">
       <span class="field-label">Tema</span>
@@ -658,6 +771,18 @@
   </dialog>
 
   <section id="onboard" hidden></section>
+  <section id="timer" hidden>
+    <div class="timer-in">
+      <div class="timer-top"><div class="emoji" id="tmEmoji"></div><div><b id="tmName"></b><span id="tmSub"></span></div></div>
+      <div class="timer-ring"><svg viewBox="0 0 200 200"><circle class="tr-track" cx="100" cy="100" r="88"/><circle class="tr-bar" id="tmBar" cx="100" cy="100" r="88"/></svg>
+        <div class="timer-time" id="tmTime">20:00</div><div class="timer-state" id="tmState">Odaklan</div></div>
+      <div class="timer-actions">
+        <button class="btn" data-action="timer-cancel">Vazgeç</button>
+        <button class="btn primary" data-action="timer-pause" id="tmPause">Duraklat</button>
+      </div>
+      <button class="timer-skip" data-action="timer-finish">Süreyi beklemeden işaretle</button>
+    </div>
+  </section>
   <canvas id="confetti" hidden></canvas>
   <div class="toast" id="toast"></div>
 
@@ -682,13 +807,15 @@
     const MILESTONES = [[3, 'img:sprout'], [7, '⭐'], [14, '💫'], [30, '🏅'], [60, '🥈'], [100, '🥇'], [200, '💎'], [365, '👑']];
     const HEAT_WEEKS = 53;
     const ICON_CHECK = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    const ICON_PLAY = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>';
     const ICON_LEFT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>';
     const ICON_RIGHT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>';
 
     // ---------- Durum ----------
-    let habits = [], notes = [], goals = [], settings = {};
+    let habits = [], notes = [], goals = [], settings = {}, journal = {};
     const TABS = ['bugun', 'aklimda', 'hedefler'];
     let tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'bugun';
+    let customWhen = null, moodMode = false;
     let justOpened = null, calSlide = null, overviewAnim = null;
     let noteWhen = 'none', openNoteId = null, editingGoalId = null, ob = null, freshLoad = false;
     let mode = location.protocol === 'file:' ? 'local' : 'unknown'; // 'cloud' | 'local' | 'unknown'
@@ -751,12 +878,31 @@
       const k = keyOf(d);
       if (sets.done.has(k)) return 'on';
       if (sets.skip.has(k)) return 'skip';
+      if (sets.frz && sets.frz.has(k)) return 'frz';
       if (!sets.days.has(d.getDay())) return 'off';
       return 'miss';
+    }
+    // Seri koruyucu: aktif bir seri varken kaçırılan planlı gün, ayda FREEZES güne kadar otomatik korunur.
+    // Geçmişi değiştirmemek için sadece özelliğin açıldığı günden (settings.freezeFrom) itibaren uygulanır.
+    const FREEZES = 2;
+    function frozenSet(sets, start, today) {
+      const out = new Set();
+      if (settings.freezeOn === false || !settings.freezeFrom) return out;
+      const from = parseKey(settings.freezeFrom);
+      let alive = false, month = -1, used = 0;
+      for (let d = start; d < today; d = addDays(d, 1)) {
+        const k = keyOf(d), mo = d.getFullYear() * 12 + d.getMonth();
+        if (mo !== month) { month = mo; used = 0; }
+        if (sets.done.has(k)) { alive = true; continue; }
+        if (sets.skip.has(k) || !sets.days.has(d.getDay())) continue;
+        if (alive && d >= from && used < FREEZES) { out.add(k); used++; } else alive = false;
+      }
+      return out;
     }
     function statsOf(h) {
       const sets = { done: new Set(h.history), skip: new Set(h.skips), days: new Set(h.days) };
       const today = dayStart(new Date()), start = startOf(h);
+      sets.frz = frozenSet(sets, start, today);
       const todayState = dayState(h, sets, today);
       const doneToday = todayState === 'on';
       const dueToday = todayState === 'miss' || doneToday;
@@ -780,7 +926,9 @@
         const s = dayState(h, sets, d);
         if (s === 'on') { hit++; due++; } else if (s === 'miss' && i > 0) due++;
       }
-      return { doneToday, dueToday, current, best, total: sets.done.size, rate: due ? Math.round((hit / due) * 100) : 0, atRisk: todayState === 'miss' && current > 0, sets };
+      const monthPrefix = keyOf(today).slice(0, 7);
+      const frzLeft = Math.max(0, FREEZES - [...sets.frz].filter((k) => k.startsWith(monthPrefix)).length);
+      return { frzLeft, doneToday, dueToday, current, best, total: sets.done.size, rate: due ? Math.round((hit / due) * 100) : 0, atRisk: todayState === 'miss' && current > 0, sets };
     }
 
     // ---------- Veri normalizasyonu + eski formattan geçiş ----------
@@ -825,6 +973,7 @@
           color: /^#[0-9a-f]{6}$/i.test(h.color) ? h.color : COLORS[i % COLORS.length],
           days: days.length ? days : ALL_DAYS.slice(),
           target: Math.min(99, Math.max(1, parseInt(h.target, 10) || 1)),
+          minutes: Math.min(240, Math.max(0, parseInt(h.minutes, 10) || 0)),
           counts: cleanCounts(h.counts),
           createdAt: created, history, skips: cleanDates(h.skips).filter((k) => !history.includes(k)),
         };
@@ -852,7 +1001,17 @@
         doneAt: Number(g.doneAt) || null,
       }));
     }
+    function normalizeJournal(j) {
+      const out = {};
+      if (j && typeof j === 'object') for (const [k, v] of Object.entries(j)) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !v) continue;
+        const m = Math.min(5, Math.max(0, parseInt(v.m, 10) || 0)), t = typeof v.t === 'string' ? v.t.slice(0, 200) : '';
+        if (m || t) out[k] = { m, t };
+      }
+      return out;
+    }
     function applyData(raw) {
+      journal = normalizeJournal(raw && raw.journal);
       habits = normalize(raw);
       notes = normalizeNotes(raw && raw.notes);
       goals = normalizeGoals(raw && raw.goals);
@@ -873,7 +1032,7 @@
       const p = store.get(K.pass); if (p) headers['X-App-Password'] = p;
       return fetch(path, { method, headers, cache: 'no-store', body: body ? JSON.stringify(body) : undefined });
     }
-    const payload = () => ({ version: 4, updatedAt: Date.now(), habits, notes, goals, settings });
+    const payload = () => ({ version: 5, updatedAt: Date.now(), habits, notes, goals, settings, journal });
 
     async function load() {
       const cached = store.get(K.cache);
@@ -895,6 +1054,7 @@
         render(); setSync('ok');
         shareAuthWithWorker();
         if (needsMigration(data)) scheduleSave();
+        if (!settings.freezeFrom) { settings.freezeFrom = todayKey(); scheduleSave(); }
         maybeOnboard();
       } catch (e) {
         console.error(e); setSync('offline'); toast('⚠️ ' + e.message);
@@ -1081,12 +1241,21 @@
         title = `${due.length - done} alışkanlık kaldı`;
         sub = risk ? `${risk} serin bugün yapmazsan sıfırlanacak.` : 'Küçük adımlar, uzun seriler.';
       }
+      // Halka: her planlı alışkanlık kendi renginde bir dilim; yapılmadıysa soluk, sayaçlıysa kısmen dolu
+      const n = due.length, gap = n > 1 ? 5 : 0, seg = n ? (C - gap * n) / n : C;
+      const segs = due.map(([h, s], i) => {
+        const part = s.doneToday ? 1 : h.target > 1 ? Math.min(1, (h.counts[tk] || 0) / h.target) : 0;
+        const off = -i * (seg + gap);
+        return `<circle cx="38" cy="38" r="32" stroke="${h.color}" stroke-opacity=".2" stroke-dasharray="${seg} ${C - seg}" stroke-dashoffset="${off}"/>`
+          + (part ? `<circle class="bar" cx="38" cy="38" r="32" stroke="${h.color}" stroke-dasharray="${seg * part} ${C - seg * part}" stroke-dashoffset="${off}"/>` : '');
+      }).join('');
       $('#summary').innerHTML = `
-        <div class="ring"><svg viewBox="0 0 76 76"><circle class="track" cx="38" cy="38" r="32"/>
-          <circle class="bar" cx="38" cy="38" r="32" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct)}"/></svg>
+        <div class="ring"><svg viewBox="0 0 76 76">${n ? segs : '<circle class="track" cx="38" cy="38" r="32"/>'}</svg>
           <span>${done}/${due.length}</span></div>
         <div><h2>${title}</h2><p>${sub}</p><p class="quote">“${quoteOfDay()}”</p></div>`;
 
+      renderNotices(all);
+      renderMood(all);
       renderOverview(all);
       $('#listTitle').innerHTML = habits.length ? `<span>Alışkanlıklar</span><span>${habits.length}</span>` : '';
 
@@ -1105,7 +1274,8 @@
         const streak = s.current ? `<span class="streak-pill t${tier}"><img class="flame" src="img/flame.webp" alt=""><span class="streak-num">${s.current} gün</span></span>` : `<span class="streak-pill zero">Seri yok</span>`;
         const count = h.counts[tk] || 0;
         const counter = h.target > 1 && !s.doneToday;
-        const checkInner = counter ? `<span class="count">${count}/${h.target}</span>` : ICON_CHECK;
+        const timed = h.minutes && !s.doneToday;
+        const checkInner = timed ? `${ICON_PLAY}<span class="tmin">${h.minutes} dk</span>` : counter ? `<span class="count">${count}/${h.target}</span>` : ICON_CHECK;
         let extra = '';
         if (s.atRisk) extra = '<span class="risk">· bugün yap!</span>';
         else if (!s.dueToday && !s.doneToday) extra = '<span>· <img src="img/snowflake.webp" alt="" style="width:14px;height:14px;vertical-align:-2px"> bugün izinli</span>';
@@ -1121,7 +1291,7 @@
                 <div class="week">${week}</div>
               </div>
               ${counter && count ? '<button class="minus" data-action="minus" aria-label="Azalt">−</button>' : ''}
-              <button class="check${popId === h.id ? ' pop' : ''}${counter && count ? ' partial' : ''}" style="--p:${Math.round((count / h.target) * 100)}" data-action="check" aria-label="Bugünü işaretle">${checkInner}</button>
+              <button class="check${popId === h.id ? ' pop' : ''}${counter && count ? ' partial' : ''}" style="--p:${Math.round((count / h.target) * 100)}" data-action="${timed ? 'timer' : 'check'}" aria-label="${timed ? 'Odak sayacını başlat' : 'Bugünü işaretle'}">${checkInner}</button>
             </div>
             ${open ? detailsHTML(h, s, idx) : ''}
           </li>`;
@@ -1129,6 +1299,60 @@
       popId = null;
       justOpened = null;
       calSlide = null;
+    }
+
+    function renderNotices(all) {
+      const out = [];
+      const y = keyOf(addDays(new Date(), -1));
+      const saved = all.filter(([, s]) => s.sets.frz.has(y));
+      if (saved.length && store.get('mystreak_notice_frz') !== y) {
+        const [h, s] = saved[0];
+        out.push(`<div class="notice" style="--c:#7dd3fc"><img src="img/snowflake.webp" alt=""><div><b>Seri koruyucu devrede</b>Dün ${esc(h.name)}${saved.length > 1 ? ` ve ${saved.length - 1} alışkanlık daha` : ''} kaçtı; ${s.current} günlük serin korundu. Bu ay ${s.frzLeft} hakkın kaldı.</div><button data-action="notice-hide" data-k="frz" data-v="${y}">Tamam</button></div>`);
+      }
+      const t = new Date();
+      const prev = new Date(t.getFullYear(), t.getMonth() - 1, 1), pk = keyOf(prev).slice(0, 7);
+      if (t.getDate() <= 5 && habits.length && store.get('mystreak_notice_month') !== pk) {
+        out.push(`<div class="notice" style="--c:var(--brand)"><img src="img/flame.webp" alt=""><div><b>${MONTHS[prev.getMonth()]} özetin hazır</b>En uzun serin, toplam günlerin ve ayın alışkanlığı tek kartta.</div><button data-action="month-card" data-y="${prev.getFullYear()}" data-m="${prev.getMonth()}">Gör</button></div>`);
+      }
+      $('#notices').innerHTML = out.join('');
+    }
+    const MOODS = [['😞', '#ef4444', 'Kötü'], ['🙁', '#f97316', 'Pek iyi değil'], ['😐', '#eab308', 'İdare eder'], ['🙂', '#84cc16', 'İyi'], ['😄', '#22c55e', 'Harika']];
+    function renderMood() {
+      const el = $('#moodCard');
+      if (!habits.length) { el.hidden = true; return; }
+      el.hidden = false;
+      const tk = todayKey(), j = journal[tk] || { m: 0, t: '' };
+      // Not alanına yazılırken yeniden çizme (imleç kaybolmasın)
+      if (document.activeElement && document.activeElement.id === 'moodText') return;
+      el.innerHTML = `<div class="mood-top"><div><h3>Bugün nasıldı?</h3><small>${j.m ? MOODS[j.m - 1][2] : 'Tek dokunuş yeter'}</small></div>
+          <div class="faces">${MOODS.map(([f, c], i) => `<button class="face${j.m === i + 1 ? ' sel' : ''}" style="--mc:${c}" data-action="mood" data-m="${i + 1}" aria-label="${MOODS[i][2]}">${f}</button>`).join('')}</div></div>
+        ${j.m ? `<input id="moodText" maxlength="200" placeholder="Günün notu (isteğe bağlı)" value="${esc(j.t)}">` : ''}`;
+    }
+    document.addEventListener('change', (e) => {
+      if (e.target.id !== 'moodText') return;
+      const tk = todayKey();
+      journal[tk] = { ...(journal[tk] || { m: 0 }), t: e.target.value.trim().slice(0, 200) };
+      e.target.blur();
+      commit();
+    });
+    // Hangi alışkanlık iyi günlerle birlikte gidiyor? (son 120 gün, her iki grupta en az 4 gün)
+    function moodInsight(all) {
+      const today = dayStart(new Date());
+      let bestTxt = null, bestDiff = 0.25;
+      for (const [h, s] of all) {
+        const yes = [], no = [];
+        for (let i = 0; i < 120; i++) {
+          const d = addDays(today, -i), k = keyOf(d), m = journal[k] && journal[k].m;
+          if (!m) continue;
+          const st = dayState(h, s.sets, d);
+          if (st === 'on') yes.push(m); else if (st === 'miss' || st === 'frz') no.push(m);
+        }
+        if (yes.length < 4 || no.length < 4) continue;
+        const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length, diff = avg(yes) - avg(no);
+        if (diff > bestDiff) { bestDiff = diff; bestTxt = `<b>${esc(h.name)}</b> yaptığın günlerde ruh halin ortalama <b>+${diff.toFixed(1).replace('.', ',')}</b> daha iyi.`; }
+      }
+      const count = Object.values(journal).filter((j) => j.m).length;
+      return bestTxt || (count < 8 ? 'Birkaç hafta ruh halini işaretle; hangi alışkanlıkların sana iyi geldiğini burada göreceksin.' : 'Şimdilik belirgin bir ilişki yok. İşaretlemeye devam et.');
     }
 
     function renderOverview(all) {
@@ -1162,11 +1386,16 @@
         if (doneN) active++;
         if (dueN && doneN >= dueN) perfect++;
         const lvl = !dueN || !doneN ? 0 : Math.max(1, Math.round((doneN / dueN) * 4));
-        cells += `<i class="l${lvl}${isToday ? ' today' : ''}" title="${d.getDate()} ${MONTHS[d.getMonth()]}: ${doneN}/${dueN}"></i>`;
+        const jm = journal[keyOf(d)] && journal[keyOf(d)].m;
+        cells += moodMode
+          ? `<i${jm ? ` style="background:${MOODS[jm - 1][1]}"` : ''} class="${isToday ? 'today' : ''}" title="${d.getDate()} ${MONTHS[d.getMonth()]}${jm ? ': ' + MOODS[jm - 1][2] : ''}"></i>`
+          : `<i class="l${lvl}${isToday ? ' today' : ''}" title="${d.getDate()} ${MONTHS[d.getMonth()]}: ${doneN}/${dueN}"></i>`;
       }
       const weekPct = weekDue ? Math.round((weekHit / weekDue) * 100) : 0;
       el.innerHTML = `
-        <div class="ov-head"><h3>Son bir yıl</h3><button data-action="toggle-overview">${collapsed ? 'Göster' : 'Gizle'}</button></div>
+        <div class="ov-head"><h3>Son bir yıl</h3><div class="ov-actions">
+          ${collapsed ? '' : `<div class="ov-mode"><button class="${moodMode ? '' : 'sel'}" data-action="heat-mode" data-m="0">Seri</button><button class="${moodMode ? 'sel' : ''}" data-action="heat-mode" data-m="1">Ruh hali</button></div>`}
+          <button data-action="toggle-overview">${collapsed ? 'Göster' : 'Gizle'}</button></div></div>
         <div class="ov-body${overviewAnim ? ' ' + overviewAnim : ''}"><div class="ov-inner">
           <div class="ov-nums">
             <div><b>%${weekPct}</b><span>Bu hafta</span></div>
@@ -1177,7 +1406,9 @@
             <div class="heat-days"><span></span><span>Pzt</span><span></span><span>Çar</span><span></span><span>Cum</span><span></span><span></span></div>
             <div class="heat-scroll" id="heatScroll"><div class="heat-grid">${cells}</div></div>
           </div>
-          <div class="legend">Az <i style="background:var(--surface-2)"></i><i style="background:color-mix(in srgb,var(--brand) 30%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--brand) 55%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--brand) 80%,var(--surface-2))"></i><i style="background:var(--brand)"></i> Çok</div>
+          <div class="legend">Az <i style="background:var(--surface-2)"></i><i style="background:color-mix(in srgb,var(--heat) 30%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--heat) 55%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--heat) 80%,var(--surface-2))"></i><i style="background:var(--heat)"></i> Çok</div>
+          ${moodMode ? `<p class="insight">${moodInsight(all)}</p>` : ''}
+          <button class="btn" style="width:100%;margin-top:12px" data-action="month-card">Aylık özet kartı</button>
         </div></div>`;
       overviewAnim = null;
       const sc = $('#heatScroll'); if (sc) sc.scrollLeft = sc.scrollWidth; // en yeni haftalar görünsün
@@ -1225,6 +1456,7 @@
           <div class="cal-legend">
             <span><i style="background:var(--c)"></i>Yapıldı</span>
             <span><i style="background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 35%,transparent) 0 3px,transparent 3px 6px)"></i><img src="img/snowflake.webp" alt="" style="width:14px;height:14px"> İzinli (seri bozulmaz)</span>
+            <span><i style="background:color-mix(in srgb,#7dd3fc 45%,transparent)"></i>Koruyucu (ayda ${FREEZES})</span>
             <span><i style="box-shadow:inset 0 0 0 1.5px var(--border)"></i>Plan dışı</span>
           </div>
           <p class="hint">Güne dokun: yapıldı → izinli → boş. Hastalık, tatil gibi günlerde "izinli" işaretle; serin bozulmaz.</p>
@@ -1270,7 +1502,7 @@
         ['1h', '1 saat sonra', Date.now() + 3600e3],
         ['evening', evening ? 'Bu akşam 20:00' : 'Yarın akşam 20:00', atTime(evening ? 0 : 1, 20)],
         ['morning', 'Yarın sabah 09:00', atTime(1, 9)],
-        ['custom', 'Saat seç…', null],
+        ['custom', noteWhen === 'custom' && customWhen ? formatWhen(customWhen) : 'Saat seç…', null],
       ];
     }
     function formatWhen(ts) {
@@ -1287,19 +1519,18 @@
       const done = notes.filter((n) => n.doneAt).sort((a, b) => b.doneAt - a.doneAt);
       const planned = open.filter((n) => n.remindAt && n.remindAt > Date.now()).length;
       // Beyin, aklındaki şey arttıkça doygunlaşır ve parlar
-      $('#brain').style.setProperty('--load', Math.min(1, open.length / 7).toFixed(2));
       if (brain3d) brain3d.setNotes(open.map((n) => ({ id: n.id, text: n.text, late: !!(n.remindAt && n.remindAt <= Date.now()) })));
       renderStagePop();
       $('#mindSub').textContent = open.length
         ? `${open.length} şey aklında${planned ? ` · ${planned} hatırlatma kurulu` : ''}`
         : 'Zihnin berrak. Aklına bir şey gelince buraya bırak.';
       $('#whenChips').innerHTML = whenOptions().map(([k, label]) => `<button type="button" class="chip${noteWhen === k ? ' sel' : ''}" data-when="${k}">${label}</button>`).join('');
-      $('#whenCustom').hidden = noteWhen !== 'custom';
       const item = (n) => {
         const late = !n.doneAt && n.remindAt && n.remindAt <= Date.now();
         const meta = n.doneAt ? `Tamamlandı · ${formatWhen(n.doneAt)}` : n.remindAt ? `${late ? 'Zamanı geldi · ' : 'Hatırlatma · '}${formatWhen(n.remindAt)}` : `Eklendi · ${formatWhen(n.createdAt)}`;
         const actions = openNoteId === n.id ? `<div class="note-actions">
             ${n.doneAt ? '' : '<button data-action="note-snooze" data-min="60">1 saat ertele</button><button data-action="note-snooze" data-min="tomorrow">Yarın sabah</button>'}
+            ${n.doneAt ? '' : '<button data-action="note-habit">Alışkanlığa çevir</button>'}
             <button class="danger" data-action="note-delete">Sil</button></div>` : '';
         return `<li class="card note${n.doneAt ? ' done' : ''}" data-nid="${n.id}">
             <div class="note-row">
@@ -1320,7 +1551,6 @@
       import('./js/brain3d.js').then((m) => {
         brain3d = m.mountBrain($('#brainStage'), { onPick: (id) => { pickedNoteId = id; renderStagePop(); } });
         if (!brain3d) return;
-        $('#brain').hidden = true;
         renderMind();
         brain3d.setVisible(tab === 'aklimda' && !document.hidden);
       }).catch((e) => console.error('3D yüklenemedi', e));
@@ -1335,7 +1565,7 @@
       pop.dataset.nid = n.id;
       pop.innerHTML = `<div class="note-text">${esc(n.text)}</div>
         <div class="note-meta">${n.remindAt ? `${late ? 'Zamanı geldi · ' : 'Hatırlatma · '}${formatWhen(n.remindAt)}` : `Eklendi · ${formatWhen(n.createdAt)}`}</div>
-        <div class="note-actions"><button data-action="note-toggle">Yaptım</button><button data-action="note-snooze" data-min="60">1 saat ertele</button><button data-action="note-delete" class="danger">Sil</button><button data-action="pop-close">Kapat</button></div>`;
+        <div class="note-actions"><button data-action="note-toggle">Yaptım</button><button data-action="note-snooze" data-min="60">1 saat ertele</button><button data-action="note-habit">Alışkanlığa çevir</button><button data-action="note-delete" class="danger">Sil</button><button data-action="pop-close">Kapat</button></div>`;
     }
     function addNote(e) {
       e.preventDefault();
@@ -1343,23 +1573,30 @@
       if (!text) return $('#captureText').focus();
       let remindAt = null;
       if (noteWhen === 'custom') {
-        remindAt = $('#whenCustom').value ? new Date($('#whenCustom').value).getTime() : null;
+        remindAt = customWhen;
         if (!remindAt) return toast('Bir tarih ve saat seç');
       } else remindAt = (whenOptions().find(([k]) => k === noteWhen) || [])[2] || null;
       notes.push({ id: Date.now(), text, createdAt: Date.now(), remindAt, doneAt: null });
       $('#captureText').value = '';
-      noteWhen = 'none';
-      const brain = $('#brain');
-      brain.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 450, easing: 'ease-out' });
+      noteWhen = 'none'; customWhen = null;
+      $('#brainStage').animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.6)' }, { filter: 'brightness(1)' }], { duration: 500, easing: 'ease-out' });
       if (remindAt && !remindPrefs().on) toast('Hatırlatmanın gelmesi için Ayarlar\'dan bildirimleri aç');
       commit();
     }
     $('#captureForm').addEventListener('submit', addNote);
     $('#whenChips').addEventListener('click', (e) => {
       const b = e.target.closest('[data-when]'); if (!b) return;
+      if (b.dataset.when === 'custom') {
+        pickDate({ value: customWhen || atTime(0, 20), time: true, min: todayKey(), title: 'Ne zaman hatırlatayım?' }).then((r) => {
+          if (r === undefined) return;
+          if (r === null) { customWhen = null; noteWhen = 'none'; }
+          else { customWhen = parseKey(r.date).getTime() + r.minutes * 60e3; noteWhen = 'custom'; }
+          renderMind();
+        });
+        return;
+      }
       noteWhen = b.dataset.when;
       renderMind();
-      if (noteWhen === 'custom') $('#whenCustom').focus();
     });
     const findNote = (id) => notes.find((n) => n.id === id);
     function toggleNote(id, li) {
@@ -1432,7 +1669,7 @@
       $('#goalTitle').value = g ? g.title : '';
       $('#goalTarget').value = g ? g.target : 10;
       $('#goalUnit').value = g ? g.unit : '';
-      $('#goalDeadline').value = g && g.deadline ? g.deadline : '';
+      setDateField($('#goalDeadline'), g && g.deadline ? g.deadline : '');
       $('#goalHabit').innerHTML = '<option value="">Elle takip ( + / − )</option>' + habits.map((h) => `<option value="${h.id}"${g && g.habitId === h.id ? ' selected' : ''}>${esc(iconText(h.emoji))} ${esc(h.name)}</option>`).join('');
       $('#goalDeleteBtn').hidden = !g;
       $('#goalDialog').showModal();
@@ -1447,7 +1684,7 @@
         title, habitId,
         target: Math.min(100000, Math.max(1, parseInt($('#goalTarget').value, 10) || 1)),
         unit: $('#goalUnit').value.trim().slice(0, 16) || (habitId ? 'gün' : ''),
-        deadline: $('#goalDeadline').value || null,
+        deadline: $('#goalDeadline').dataset.value || null,
       };
       if (editingGoalId) Object.assign(findGoal(editingGoalId), fields);
       else goals.push({ id: Date.now(), ...fields, progress: 0, createdAt: Date.now(), doneAt: null });
@@ -1475,7 +1712,8 @@
     }
     function saveObInputs() {
       document.querySelectorAll('#onboard [data-days]').forEach((i) => { ob.picks[i.dataset.days] = Math.max(0, parseInt(i.value, 10) || 0); });
-      ['title', 'target', 'unit', 'deadline', 'link'].forEach((k) => { const el = $('#ob-goal-' + k); if (el) ob.goal[k] = el.value; });
+      ['title', 'target', 'unit', 'link'].forEach((k) => { const el = $('#ob-goal-' + k); if (el) ob.goal[k] = el.value; });
+      const dl = $('#ob-goal-deadline'); if (dl) ob.goal.deadline = dl.dataset.value || '';
     }
     function renderOnboarding() {
       const steps = 4, st = ob.step;
@@ -1506,7 +1744,7 @@
           <div class="field row2"><div><label class="field-label" for="ob-goal-target">Hedef sayı</label><input type="number" id="ob-goal-target" min="1" value="${esc(g.target)}" placeholder="100"></div>
           <div><label class="field-label" for="ob-goal-unit">Birim</label><input type="text" id="ob-goal-unit" maxlength="16" value="${esc(g.unit)}" placeholder="gün"></div></div>
           <div class="field"><label class="field-label" for="ob-goal-link">İlerleme</label><select id="ob-goal-link">${linkOpts}</select></div>
-          <div class="field"><label class="field-label" for="ob-goal-deadline">Bitiş tarihi (isteğe bağlı)</label><input type="date" id="ob-goal-deadline" value="${esc(g.deadline)}"></div>`;
+          <div class="field"><label class="field-label" for="ob-goal-deadline">Bitiş tarihi (isteğe bağlı)</label><button type="button" class="date-field" id="ob-goal-deadline" data-action="pick-deadline" data-value="${esc(g.deadline)}">${g.deadline ? dateLabel(g.deadline) : 'Tarih seç'}</button></div>`;
         actions = '<button class="btn" data-action="ob-skip-goal">Şimdilik yok</button><button class="btn primary" data-action="ob-next">Devam</button>';
       } else {
         art = 'brain'; title = 'Aklında tutma, buraya bırak.';
@@ -1564,6 +1802,259 @@
       }, { passive: true });
     }
 
+    // ---------- Odak sayacı ----------
+    // Durum localStorage'da tutulur: sayfa kapanıp açılınca kaldığı yerden devam eder, süre dolmuşsa işaretlenir.
+    const TK = 'mystreak_timer';
+    let timerTick = null;
+    const timerState = () => { try { return JSON.parse(store.get(TK)); } catch (e) { return null; } };
+    function startTimer(id) {
+      const h = find(id); if (!h || !h.minutes) return;
+      store.set(TK, JSON.stringify({ id, total: h.minutes * 60e3, endsAt: Date.now() + h.minutes * 60e3, left: null }));
+      if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {});
+      showTimer();
+    }
+    function showTimer() {
+      const t = timerState(), h = t && find(t.id);
+      if (!h) { store.del(TK); return; }
+      const el = $('#timer');
+      el.style.setProperty('--c', h.color);
+      $('#tmEmoji').innerHTML = iconHTML(h.emoji);
+      $('#tmName').textContent = h.name;
+      $('#tmSub').textContent = `${h.minutes} dakikalık odak`;
+      el.classList.remove('closing');
+      el.hidden = false;
+      clearInterval(timerTick);
+      timerTick = setInterval(tickTimer, 250);
+      tickTimer();
+    }
+    function tickTimer() {
+      const t = timerState(); if (!t) return;
+      const left = t.left != null ? t.left : Math.max(0, t.endsAt - Date.now());
+      const sec = Math.ceil(left / 1000);
+      $('#tmTime').textContent = `${pad(Math.floor(sec / 60))}:${pad(sec % 60)}`;
+      const C = 2 * Math.PI * 88;
+      const bar = $('#tmBar');
+      bar.style.strokeDasharray = C;
+      bar.style.strokeDashoffset = C * (left / t.total);
+      $('#timer').classList.toggle('paused', t.left != null);
+      $('#tmState').textContent = t.left != null ? 'Duraklatıldı' : 'Odaklan';
+      $('#tmPause').textContent = t.left != null ? 'Devam et' : 'Duraklat';
+      document.title = t.left != null ? 'myStreak' : `${pad(Math.floor(sec / 60))}:${pad(sec % 60)} · ${find(t.id) ? find(t.id).name : ''}`;
+      if (left <= 0) finishTimer(true);
+    }
+    function closeTimer() {
+      clearInterval(timerTick);
+      store.del(TK);
+      document.title = 'myStreak';
+      const el = $('#timer');
+      el.classList.add('closing');
+      setTimeout(() => { el.hidden = true; el.classList.remove('closing'); }, 280);
+    }
+    function finishTimer(natural) {
+      const t = timerState(); if (!t) return;
+      const h = find(t.id);
+      closeTimer();
+      if (!h) return;
+      if (natural) {
+        if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+        try {
+          const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain();
+          o.frequency.value = 880; o.connect(g); g.connect(a.destination);
+          g.gain.setValueAtTime(0.15, a.currentTime); g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.8);
+          o.start(); o.stop(a.currentTime + 0.8);
+        } catch (e) {}
+        if (document.hidden && navigator.serviceWorker && Notification.permission === 'granted') {
+          navigator.serviceWorker.ready.then((r) => r.showNotification('Süre doldu', { body: `${h.name} tamamlandı.`, icon: '/icon-192.png', tag: 'mystreak-timer' }));
+        }
+      }
+      const tk = todayKey();
+      if (h.target > 1) checkToday(h.id);
+      else if (!h.history.includes(tk)) toggleDone(h.id, tk);
+      toast(natural ? `Süre doldu: ${h.name} işaretlendi` : `${h.name} işaretlendi`);
+    }
+    function pauseTimer() {
+      const t = timerState(); if (!t) return;
+      if (t.left != null) { t.endsAt = Date.now() + t.left; t.left = null; }
+      else t.left = Math.max(0, t.endsAt - Date.now());
+      store.set(TK, JSON.stringify(t));
+      tickTimer();
+    }
+
+    // ---------- Aylık özet kartı (1080×1920, Instagram hikâyesi) ----------
+    let mc = null;
+    function monthStats(y, m) {
+      const days = new Date(y, m + 1, 0).getDate(), today = dayStart(new Date());
+      const all = habits.map((h) => [h, statsOf(h)]);
+      const per = all.map(([h, s]) => {
+        let hit = 0, due = 0, run = 0, best = 0;
+        for (let d = 1; d <= days; d++) {
+          const date = new Date(y, m, d); if (date > today) break;
+          const st = dayState(h, s.sets, date);
+          if (st === 'on') { hit++; due++; best = Math.max(best, ++run); } else if (st === 'miss') { due++; run = 0; }
+        }
+        return { h, hit, due, best, rate: due ? hit / due : 0 };
+      });
+      const cells = [];
+      let perfect = 0, total = 0, moodSum = 0, moodN = 0;
+      for (let d = 1; d <= days; d++) {
+        const date = new Date(y, m, d), k = keyOf(date);
+        let dueN = 0, doneN = 0;
+        if (date <= today) all.forEach(([h, s]) => { const st = dayState(h, s.sets, date); if (st === 'on') { doneN++; dueN++; } else if (st === 'miss') dueN++; });
+        total += doneN;
+        if (dueN && doneN >= dueN) perfect++;
+        if (journal[k] && journal[k].m) { moodSum += journal[k].m; moodN++; }
+        cells.push(date > today ? -1 : dueN ? doneN / dueN : 0);
+      }
+      const star = per.filter((p) => p.due >= 3).sort((a, b) => b.rate - a.rate || b.hit - a.hit)[0];
+      const longest = per.sort((a, b) => b.best - a.best)[0];
+      return { cells, perfect, total, mood: moodN ? moodSum / moodN : 0, star, longest, lead: (new Date(y, m, 1).getDay() + 6) % 7 };
+    }
+    const loadImg = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+    async function drawMonthCard(y, m) {
+      await Promise.all([document.fonts.load('800 120px "Bricolage Grotesque"'), document.fonts.load('600 40px "DM Sans"')]).catch(() => {});
+      const st = monthStats(y, m), W = 1080, H = 1920;
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d');
+      const accent = st.star ? st.star.h.color : '#f97316';
+      x.fillStyle = '#0a0b0f'; x.fillRect(0, 0, W, H);
+      const g = x.createRadialGradient(W / 2, 520, 40, W / 2, 520, 900);
+      g.addColorStop(0, accent + '55'); g.addColorStop(1, '#0a0b0f00');
+      x.fillStyle = g; x.fillRect(0, 0, W, H);
+      const disp = (sz, w = 800) => `${w} ${sz}px "Bricolage Grotesque", sans-serif`, body = (sz, w = 600) => `${w} ${sz}px "DM Sans", sans-serif`;
+      x.textAlign = 'left'; x.fillStyle = 'rgba(255,255,255,.55)'; x.font = body(34, 700);
+      x.fillText('MYSTREAK · AYLIK ÖZET', 90, 150);
+      x.fillStyle = '#fff'; x.font = disp(130);
+      x.fillText(MONTHS[m], 86, 290);
+      x.fillStyle = 'rgba(255,255,255,.45)'; x.font = disp(70, 700); x.fillText(String(y), 90, 380);
+      const flame = await loadImg('img/flame.webp');
+      if (flame) x.drawImage(flame, W - 400, 120, 320, 320);
+      // Büyük sayı: ayın en uzun serisi
+      x.fillStyle = '#fff'; x.font = disp(260);
+      const lb = st.longest ? st.longest.best : 0;
+      x.fillText(String(lb), 80, 700);
+      const lw = x.measureText(String(lb)).width;
+      x.font = disp(60, 700); x.fillStyle = 'rgba(255,255,255,.7)'; x.fillText('gün', 100 + lw, 700);
+      x.font = body(38); x.fillStyle = 'rgba(255,255,255,.6)';
+      x.fillText(st.longest && lb ? `en uzun seri · ${st.longest.h.name}` : 'en uzun seri', 90, 770);
+      // Kutucuklar
+      const box = (bx, by, label, value) => {
+        x.fillStyle = 'rgba(255,255,255,.06)'; x.beginPath(); x.roundRect(bx, by, 430, 200, 36); x.fill();
+        x.fillStyle = '#fff'; x.font = disp(92); x.fillText(value, bx + 40, by + 115);
+        x.fillStyle = 'rgba(255,255,255,.55)'; x.font = body(32); x.fillText(label, bx + 40, by + 165);
+      };
+      box(90, 850, 'toplam işaret', String(st.total));
+      box(560, 850, 'tam gün', String(st.perfect));
+      // Ayın takvimi (tamamlama oranına göre)
+      const cs = 104, gx = 90, gy = 1150;
+      st.cells.forEach((v, i) => {
+        const col = (st.lead + i) % 7, row = Math.floor((st.lead + i) / 7);
+        x.beginPath(); x.roundRect(gx + col * (cs + 22), gy + row * (cs - 26 + 22), cs, cs - 26, 20);
+        x.fillStyle = v < 0 ? 'rgba(255,255,255,.03)' : v === 0 ? 'rgba(255,255,255,.08)' : accent;
+        x.globalAlpha = v > 0 ? 0.35 + 0.65 * v : 1; x.fill(); x.globalAlpha = 1;
+      });
+      // Alt: ayın alışkanlığı + ruh hali
+      x.fillStyle = 'rgba(255,255,255,.55)'; x.font = body(32, 700); x.fillText('AYIN ALIŞKANLIĞI', 90, 1720);
+      x.fillStyle = '#fff'; x.font = disp(64);
+      x.fillText(st.star ? `${st.star.h.name}  %${Math.round(st.star.rate * 100)}` : '—', 90, 1800);
+      if (st.mood) {
+        x.textAlign = 'right'; x.fillStyle = 'rgba(255,255,255,.55)'; x.font = body(32, 700); x.fillText('RUH HALİ', W - 90, 1720);
+        x.fillStyle = '#fff'; x.font = disp(64); x.fillText(`${MOODS[Math.round(st.mood) - 1][0]} ${st.mood.toFixed(1).replace('.', ',')}`, W - 90, 1800);
+      }
+      return c;
+    }
+    async function openMonthCard(y, m) {
+      mc = { y, m };
+      $('[data-mc="-1"]').innerHTML = ICON_LEFT; $('[data-mc="1"]').innerHTML = ICON_RIGHT;
+      if (!$('#monthDialog').open) $('#monthDialog').showModal();
+      await paintMonthCard();
+    }
+    async function paintMonthCard() {
+      $('#mcTitle').textContent = `${MONTHS[mc.m]} ${mc.y}`;
+      const canvas = await drawMonthCard(mc.y, mc.m);
+      mc.blob = await new Promise((ok) => canvas.toBlob(ok, 'image/png'));
+      if (mc.url) URL.revokeObjectURL(mc.url);
+      mc.url = URL.createObjectURL(mc.blob);
+      $('#mcImg').src = mc.url;
+    }
+    $('#monthDialog').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-mc]'); if (!b || !mc) return;
+      const d = new Date(mc.y, mc.m + Number(b.dataset.mc), 1);
+      if (d > new Date()) return;
+      mc.y = d.getFullYear(); mc.m = d.getMonth(); paintMonthCard();
+    });
+    async function shareMonthCard() {
+      if (!mc || !mc.blob) return;
+      const file = new File([mc.blob], `mystreak-${mc.y}-${pad(mc.m + 1)}.png`, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: `${MONTHS[mc.m]} özetim` }); return; } catch (e) { if (e.name === 'AbortError') return; }
+      }
+      const a = document.createElement('a'); a.href = mc.url; a.download = file.name; a.click();
+    }
+
+    // ---------- Tarih / saat seçici ----------
+    const dateLabel = (k) => { const d = parseKey(k); return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+    function setDateField(el, key) {
+      el.dataset.value = key || '';
+      el.textContent = key ? dateLabel(key) : 'Tarih seç';
+      el.classList.toggle('empty', !key);
+    }
+    let dp = null;
+    // value: 'YYYY-MM-DD' ya da ms; time: saat de seçilsin mi. Döner: {date, minutes} | null (temizle) | undefined (vazgeç)
+    function pickDate({ value, time = false, min = null, title = 'Tarih seç', quick } = {}) {
+      const base = value ? (typeof value === 'number' ? new Date(value) : parseKey(value)) : new Date();
+      dp = { sel: value ? keyOf(base) : null, y: base.getFullYear(), m: base.getMonth(), time, min,
+        minutes: time ? (value ? base.getHours() * 60 + base.getMinutes() : 20 * 60) : 0, dir: null };
+      $('#dpTitle').textContent = title;
+      $('#dpTime').hidden = !time;
+      const t = new Date();
+      const q = quick || (time
+        ? [['Bugün', 0], ['Yarın', 1], ['Hafta sonu', (6 - t.getDay() + 7) % 7 || 7], ['1 hafta sonra', 7]]
+        : [['1 ay', 30], ['3 ay', 91], ['6 ay', 182], ['Yıl sonu', Math.round((new Date(t.getFullYear(), 11, 31) - dayStart(t)) / 864e5)]]);
+      $('#dpQuick').innerHTML = q.map(([l, n]) => `<button type="button" class="chip" data-dp-quick="${n}">${l}</button>`).join('');
+      $('[data-dp-nav="-1"]').innerHTML = ICON_LEFT; $('[data-dp-nav="1"]').innerHTML = ICON_RIGHT;
+      renderPicker();
+      $('#datePicker').showModal();
+      return new Promise((resolve) => { dp.resolve = resolve; });
+    }
+    function renderPicker() {
+      const { y, m } = dp, tk = todayKey();
+      $('#dpMonth').innerHTML = `${MONTHS[m]}<small>${y}</small>`;
+      const lead = (new Date(y, m, 1).getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate();
+      let html = WEEK_ORDER.map((d) => `<div class="dn">${DAYS2[d]}</div>`).join('') + '<div></div>'.repeat(lead);
+      for (let d = 1; d <= days; d++) {
+        const k = keyOf(new Date(y, m, d)), off = dp.min && k < dp.min;
+        html += `<div class="cd"><button type="button" class="${k === dp.sel ? 'sel' : 'miss'}${k === tk ? ' today' : ''}" data-dp-day="${k}"${off ? ' disabled' : ''}>${d}</button></div>`;
+      }
+      const g = $('#dpGrid');
+      g.innerHTML = html;
+      g.className = 'cal dp-grid' + (dp.dir ? ' slide-' + dp.dir : '');
+      dp.dir = null;
+      $('#dpH').textContent = pad(Math.floor(dp.minutes / 60));
+      $('#dpM').textContent = pad(dp.minutes % 60);
+      $('#dpResult').textContent = dp.sel ? dateLabel(dp.sel) + (dp.time ? ` · ${pad(Math.floor(dp.minutes / 60))}:${pad(dp.minutes % 60)}` : '') : 'Bir gün seç';
+    }
+    function finishPicker(result) {
+      if (!dp) return;
+      const r = dp.resolve; dp = null;
+      $('#datePicker').close();
+      r(result);
+    }
+    $('#datePicker').addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b || !dp) return;
+      if (b.dataset.dpDay) { dp.sel = b.dataset.dpDay; renderPicker(); }
+      else if (b.dataset.dpNav) { const d = new Date(dp.y, dp.m + Number(b.dataset.dpNav), 1); dp.y = d.getFullYear(); dp.m = d.getMonth(); dp.dir = Number(b.dataset.dpNav) > 0 ? 'l' : 'r'; renderPicker(); }
+      else if (b.dataset.dpQuick !== undefined) { const d = addDays(new Date(), Number(b.dataset.dpQuick)); dp.sel = keyOf(d); dp.y = d.getFullYear(); dp.m = d.getMonth(); renderPicker(); }
+      else if (b.dataset.dpH) { dp.minutes = (dp.minutes + Number(b.dataset.dpH) * 60 + 1440) % 1440; renderPicker(); }
+      else if (b.dataset.dpM) { const h = Math.floor(dp.minutes / 60); dp.minutes = h * 60 + (((dp.minutes % 60) + Number(b.dataset.dpM) + 60) % 60); renderPicker(); }
+      else if (b.hasAttribute('data-dp-clear')) finishPicker(null);
+      else if (b.hasAttribute('data-dp-ok')) {
+        if (!dp.sel) return toast('Bir gün seç');
+        if (dp.time && parseKey(dp.sel).getTime() + dp.minutes * 60e3 < Date.now()) return toast('Geçmiş bir saat seçtin');
+        finishPicker({ date: dp.sel, minutes: dp.minutes });
+      }
+    });
+    $('#datePicker').addEventListener('close', () => { if (dp) { const r = dp.resolve; dp = null; r(undefined); } });
+
     // ---------- Konfeti ----------
     function confetti(count = 140) {
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -1590,13 +2081,16 @@
     }
 
     // ---------- Ekle / Düzenle diyaloğu ----------
-    function openHabitDialog(id) {
+    let convertNoteId = null;
+    function openHabitDialog(id, prefill = {}) {
       editingId = id || null;
+      convertNoteId = prefill.noteId || null;
       const h = id ? find(id) : null;
       draft = { emoji: h ? h.emoji : EMOJIS[0], color: h ? h.color : (COLORS.find((c) => !habits.some((x) => x.color === c)) || COLORS[habits.length % COLORS.length]), days: h ? h.days.slice() : ALL_DAYS.slice() };
       $('#habitDialogTitle').textContent = h ? 'Alışkanlığı düzenle' : 'Yeni alışkanlık';
-      $('#habitName').value = h ? h.name : '';
+      $('#habitName').value = h ? h.name : (prefill.name || '');
       $('#habitTarget').value = h ? h.target : 1;
+      $('#habitMinutes').value = h && h.minutes ? h.minutes : '';
       $('#habitBackfill').value = '';
       $('#habitBackfill').placeholder = h ? String(statsOf(h).current) : '0';
       paintPickers();
@@ -1640,9 +2134,11 @@
       if (!name) return;
       const target = Math.min(99, Math.max(1, parseInt($('#habitTarget').value, 10) || 1));
       const back = Math.min(3650, Math.max(0, parseInt($('#habitBackfill').value, 10) || 0));
+      const minutes = Math.min(240, Math.max(0, parseInt($('#habitMinutes').value, 10) || 0));
       let h;
-      if (editingId) Object.assign((h = find(editingId)), { name, ...draft, target });
-      else habits.push((h = { id: Date.now(), name, ...draft, target, counts: {}, createdAt: Date.now(), history: [], skips: [] }));
+      if (editingId) Object.assign((h = find(editingId)), { name, ...draft, target, minutes });
+      else habits.push((h = { id: Date.now(), name, ...draft, target, minutes, counts: {}, createdAt: Date.now(), history: [], skips: [] }));
+      if (convertNoteId) { notes = notes.filter((n) => n.id !== convertNoteId); convertNoteId = null; pickedNoteId = null; toast('Not alışkanlığa çevrildi'); setTab('bugun'); }
       if (back) { backfill(h, back); toast(`${statsOf(h).current} günlük seri kaydedildi`); }
       $('#habitDialog').close();
       commit();
@@ -1713,6 +2209,11 @@
       }
     }
     $('#remindOn').addEventListener('change', onRemindChange);
+    $('#freezeOn').addEventListener('change', (e) => {
+      settings.freezeOn = e.target.checked;
+      if (e.target.checked) settings.freezeFrom = todayKey();
+      commit();
+    });
     $('#remindTime').addEventListener('change', () => { if ($('#remindOn').checked) onRemindChange(); else store.set(K.remind, JSON.stringify({ on: false, time: $('#remindTime').value })); });
     async function testPush() {
       try {
@@ -1731,8 +2232,9 @@
       $('#modeInfo').textContent = mode === 'cloud'
         ? 'Verilerin buluta kaydediliyor; tüm cihazlarında aynı.'
         : 'Bulut bağlantısı yok; veriler sadece bu tarayıcıda. Yedek indirmeyi unutma.';
-      $('#modeInfo').textContent += ' · Sürüm 7';
+      $('#modeInfo').textContent += ' · Sürüm 8';
       paintRemind();
+      $('#freezeOn').checked = settings.freezeOn !== false;
       $('#settingsDialog').showModal();
     }
     $('#themeSeg').addEventListener('click', (e) => {
@@ -1782,6 +2284,32 @@
       const goalLi = el.closest('[data-gid]'), gid = goalLi ? Number(goalLi.dataset.gid) : null;
       switch (el.dataset.action) {
         case 'note-toggle': toggleNote(nid, noteLi); break;
+        case 'note-habit': { const n = findNote(nid); if (n) openHabitDialog(null, { name: n.text.slice(0, 60), noteId: n.id }); break; }
+        case 'mood': {
+          const tk = todayKey(), m = Number(el.dataset.m);
+          journal[tk] = { t: '', ...(journal[tk] || {}), m: journal[tk] && journal[tk].m === m ? 0 : m };
+          if (navigator.vibrate) navigator.vibrate(8);
+          commit();
+          if (journal[tk].m) setTimeout(() => { const i = $('#moodText'); if (i && !i.value) i.focus(); }, 50);
+          break;
+        }
+        case 'heat-mode': moodMode = el.dataset.m === '1'; renderToday(); break;
+        case 'notice-hide': store.set('mystreak_notice_' + el.dataset.k, el.dataset.v); renderToday(); break;
+        case 'month-card': {
+          const t = new Date();
+          if (el.dataset.y) store.set('mystreak_notice_month', `${el.dataset.y}-${pad(Number(el.dataset.m) + 1)}`);
+          openMonthCard(el.dataset.y ? Number(el.dataset.y) : t.getFullYear(), el.dataset.m ? Number(el.dataset.m) : t.getMonth());
+          renderNotices(habits.map((h) => [h, statsOf(h)]));
+          break;
+        }
+        case 'month-share': shareMonthCard(); break;
+        case 'timer': startTimer(id); break;
+        case 'timer-pause': pauseTimer(); break;
+        case 'timer-finish': finishTimer(false); break;
+        case 'timer-cancel': if (confirm('Sayaç durdurulsun mu? Alışkanlık işaretlenmeyecek.')) closeTimer(); break;
+        case 'pick-deadline':
+          pickDate({ value: el.dataset.value || null, min: todayKey(), title: 'Bitiş tarihi' }).then((r) => { if (r !== undefined) setDateField(el, r ? r.date : ''); });
+          break;
         case 'pop-close': pickedNoteId = null; renderStagePop(); break;
         case 'add-menu': $('#addSheet').showModal(); break;
         case 'add-habit': $('#addSheet').close(); openHabitDialog(); break;
@@ -1877,7 +2405,7 @@
     });
 
     if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('/sw.js').catch(console.error);
-    load();
+    load().then(() => { if (timerState()) showTimer(); });
     if (tab === 'aklimda') ensureBrain();
   </script>
 </body>
