@@ -1,0 +1,11 @@
+{
+  "name": "myStreak",
+  "short_name": "myStreak",
+  "description": "Alışkanlıklarını takip et, serini koru.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#f97316",
+  "lang": "tr",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
