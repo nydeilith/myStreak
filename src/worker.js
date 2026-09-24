@@ -58,7 +58,11 @@ async function pushApi(request, env) {
 }
 
 async function handleApi(request, env) {
-  if (env.APP_PASSWORD && !sameSecret(request.headers.get('X-App-Password') || '', env.APP_PASSWORD)) {
+  // Şifre tanımlı değilse veriyi herkese açmak yerine kapalı kal
+  if (!env.APP_PASSWORD) {
+    return json({ error: 'APP_PASSWORD ayarlanmamış: Worker → Settings → Variables and Secrets kısmına ekle' }, 503);
+  }
+  if (!sameSecret(request.headers.get('X-App-Password') || '', env.APP_PASSWORD)) {
     return json({ error: 'unauthorized' }, 401);
   }
   const { pathname } = new URL(request.url);

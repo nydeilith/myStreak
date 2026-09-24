@@ -1,5 +1,5 @@
 // myStreak service worker: çevrimdışı açılış + bildirimler
-const CACHE = 'mystreak-v3';
+const CACHE = 'mystreak-v4';
 const ASSETS = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-192.png'];
 
 self.addEventListener('install', (e) => {

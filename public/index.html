@@ -114,6 +114,21 @@
     .meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; }
     .streak-pill { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; color: var(--text); }
     .streak-pill.zero { color: var(--muted); font-weight: 600; }
+    /* Seri büyüdükçe alev güçlenir: t1 1-6, t2 7-29, t3 30-99, t4 100+ gün */
+    .flame { display: inline-block; transform-origin: 50% 90%; }
+    .t2 .flame { filter: drop-shadow(0 0 4px rgba(249,115,22,.7)); animation: flicker 1.6s ease-in-out infinite; }
+    .t3 .flame { filter: drop-shadow(0 0 6px rgba(239,68,68,.9)); animation: flicker 1.1s ease-in-out infinite; font-size: 1.12em; }
+    .t4 .flame { filter: hue-rotate(200deg) saturate(1.6) drop-shadow(0 0 7px rgba(99,102,241,.9)); animation: flicker .9s ease-in-out infinite; font-size: 1.2em; }
+    .t3 .streak-num { color: #f97316; } .t4 .streak-num { color: #818cf8; }
+    @keyframes flicker { 0%,100% { transform: scale(1) rotate(-2deg); } 50% { transform: scale(1.12) rotate(3deg); } }
+    .habit.t3 .emoji, .habit.t4 .emoji { box-shadow: 0 0 0 2px var(--c), 0 0 18px color-mix(in srgb, var(--c) 55%, transparent); }
+    .check .count { font-weight: 800; font-size: .9rem; color: var(--text); }
+    .check.partial { background: conic-gradient(color-mix(in srgb, var(--c) 35%, transparent) calc(var(--p) * 1%), transparent 0); }
+    .minus { width: 28px; height: 28px; flex: none; border-radius: 9px; display: grid; place-items: center; background: var(--surface-2); color: var(--muted); font-weight: 800; margin-right: -6px; }
+    .quote { margin-top: 8px; font-size: .78rem; color: var(--muted); font-style: italic; line-height: 1.4; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field input[type="number"] { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); outline: none; font-size: 1rem; }
+    .field .hint { margin: 6px 2px 0; }
     .risk { color: var(--warn); font-weight: 600; }
     .week { display: flex; gap: 5px; margin-top: 10px; }
     .day { width: 30px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .64rem; color: var(--muted); font-weight: 600; }
@@ -271,6 +286,18 @@
           <button type="button" data-preset="weekend">Hafta sonu</button>
         </div>
       </div>
+      <div class="field row2">
+        <div>
+          <label for="habitTarget" class="field-label">Günlük hedef</label>
+          <input type="number" id="habitTarget" min="1" max="99" value="1" inputmode="numeric">
+        </div>
+        <div>
+          <label for="habitBackfill" class="field-label">Kaç gündür yapıyorsun?</label>
+          <input type="number" id="habitBackfill" min="0" max="3650" placeholder="0" inputmode="numeric">
+        </div>
+      </div>
+      <p class="hint" style="margin-top:-10px">Hedef 1 ise tek dokunuş yeter; 8 yazarsan günde 8 kez (ör. 8 bardak su) sayar.
+        "Kaç gündür" kısmına eski serini yaz: dünden geriye o kadar gün yapıldı sayılır, bugünden itibaren işaretlemeye devam edersin.</p>
       <div class="dialog-actions">
         <button type="button" class="btn" data-action="close-dialog">Vazgeç</button>
         <button type="submit" class="btn primary" value="save">Kaydet</button>
@@ -420,6 +447,11 @@
 
     // ---------- Veri normalizasyonu + eski formattan geçiş ----------
     const cleanDates = (arr) => [...new Set((Array.isArray(arr) ? arr : []).filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k)))].sort();
+    function cleanCounts(c) {
+      const out = {};
+      if (c && typeof c === 'object') for (const [k, v] of Object.entries(c)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && v > 0) out[k] = Math.min(999, v | 0);
+      return out;
+    }
     function runEndingAt(set, date) { let n = 0; for (let d = date; set.has(keyOf(d)); d = addDays(d, -1)) n++; return n; }
     function normalize(raw) {
       const list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.habits) ? raw.habits : []);
@@ -445,6 +477,8 @@
           emoji: typeof h.emoji === 'string' && h.emoji ? h.emoji.slice(0, 8) : '🔥',
           color: /^#[0-9a-f]{6}$/i.test(h.color) ? h.color : COLORS[i % COLORS.length],
           days: days.length ? days : ALL_DAYS.slice(),
+          target: Math.min(99, Math.max(1, parseInt(h.target, 10) || 1)),
+          counts: cleanCounts(h.counts),
           createdAt: created, history, skips: cleanDates(h.skips).filter((k) => !history.includes(k)),
         };
       });
@@ -486,7 +520,7 @@
         render(); setSync('ok');
         if (needsMigration(data)) scheduleSave();
       } catch (e) {
-        console.error(e); setSync('offline');
+        console.error(e); setSync('offline'); toast('⚠️ ' + e.message);
       }
     }
 
@@ -508,10 +542,10 @@
       try {
         const r = await api('PUT', payload());
         if (r.status === 401) return askLogin();
-        if (!r.ok) throw new Error(r.status);
+        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `Kaydedilemedi (${r.status})`);
         store.del(K.dirty); mode = 'cloud'; setSync('ok');
       } catch (e) {
-        console.error(e); setSync('offline');
+        console.error(e); setSync('offline'); toast('⚠️ ' + e.message);
       }
     }
     window.addEventListener('online', () => { if (store.get(K.dirty)) push(); });
@@ -534,31 +568,63 @@
     const find = (id) => habits.find((h) => h.id === id);
     const allDoneToday = () => { const s = habits.map(statsOf).filter((x) => x.dueToday); return s.length > 0 && s.every((x) => x.doneToday); };
 
-    // Ana buton ve 7 günlük şerit: yapıldı <-> yapılmadı
+    // Bir günü yapıldı / yapılmadı yap (sayaçlı alışkanlıkta sayaç da hedefe ya da sıfıra çekilir)
+    function setDone(h, key, done) {
+      h.history = h.history.filter((k) => k !== key);
+      if (h.target > 1) { if (done) h.counts[key] = h.target; else delete h.counts[key]; }
+      if (done) { h.history.push(key); h.history.sort(); h.skips = h.skips.filter((k) => k !== key); }
+    }
+    // 7 günlük şerit: yapıldı <-> yapılmadı
     function toggleDone(id, key) {
       const h = find(id); if (!h || key > todayKey()) return;
       const wasAllDone = allDoneToday();
-      const i = h.history.indexOf(key);
-      if (i >= 0) h.history.splice(i, 1);
-      else {
-        h.history.push(key); h.history.sort();
-        h.skips = h.skips.filter((k) => k !== key);
-        if (key === todayKey()) celebrate(h, wasAllDone);
-      }
+      const done = h.history.includes(key);
+      setDone(h, key, !done);
+      if (!done && key === todayKey()) celebrate(h, wasAllDone);
       commit();
+    }
+    // Ana buton: tek seferlikte aç/kapa, sayaçlıda +1 (hedefe ulaşınca yapıldı sayılır)
+    function checkToday(id) {
+      const h = find(id); if (!h) return;
+      const tk = todayKey();
+      if (h.target <= 1 || h.history.includes(tk)) return toggleDone(id, tk);
+      const wasAllDone = allDoneToday();
+      const n = (h.counts[tk] || 0) + 1;
+      h.counts[tk] = n;
+      if (navigator.vibrate) navigator.vibrate(8);
+      if (n >= h.target) { setDone(h, tk, true); celebrate(h, wasAllDone); }
+      commit();
+    }
+    function minusToday(id) {
+      const h = find(id); if (!h) return;
+      const tk = todayKey();
+      const n = Math.max(0, (h.counts[tk] || 0) - 1);
+      if (n) h.counts[tk] = n; else delete h.counts[tk];
+      h.history = h.history.filter((k) => k !== tk);
+      commit();
+    }
+    // Eski seriyi elle başlat: dünden geriye, planlı günlerden n tanesini yapıldı say
+    function backfill(h, n) {
+      let added = 0;
+      for (let d = addDays(new Date(), -1), guard = 0; added < n && guard < 4000; d = addDays(d, -1), guard++) {
+        if (!h.days.includes(d.getDay())) continue;
+        const k = keyOf(d);
+        if (!h.history.includes(k)) setDone(h, k, true);
+        added++;
+      }
     }
     // Takvim: boş -> yapıldı -> izinli -> boş (plan dışı günlerde izin adımı atlanır)
     function cycleDay(id, key) {
       const h = find(id); if (!h || key > todayKey()) return;
       const scheduled = h.days.includes(parseKey(key).getDay());
       if (h.history.includes(key)) {
-        h.history = h.history.filter((k) => k !== key);
+        setDone(h, key, false);
         if (scheduled) { h.skips.push(key); h.skips.sort(); }
       } else if (h.skips.includes(key)) {
         h.skips = h.skips.filter((k) => k !== key);
       } else {
         const wasAllDone = allDoneToday();
-        h.history.push(key); h.history.sort();
+        setDone(h, key, true);
         if (key === todayKey()) celebrate(h, wasAllDone);
       }
       commit();
@@ -587,6 +653,18 @@
       commit();
     }
 
+    const flameTier = (n) => (n >= 100 ? 4 : n >= 30 ? 3 : n >= 7 ? 2 : n >= 1 ? 1 : 0);
+    const QUOTES = [
+      'Küçük adımlar, büyük değişimler getirir.', 'Motivasyon başlatır, alışkanlık devam ettirir.',
+      'Bugün yaptığın, yarınki seni inşa eder.', 'Mükemmel olmak zorunda değilsin, sadece devam et.',
+      'Zinciri kırma.', 'Her gün %1 daha iyi.', 'Disiplin, ne istediğini hatırlamaktır.',
+      'Zor günler de seriye dahil.', 'Başlamak için harika olmak gerekmez; harika olmak için başlamak gerekir.',
+      'Damlaya damlaya göl olur.', 'Sabır acıdır ama meyvesi tatlıdır.', 'Yavaş ilerlemek, hiç ilerlememekten iyidir.',
+      'Bir alışkanlık, her gün verilen küçük bir sözdür.', 'Kendine verdiğin sözü tut.', 'Yol, yürüyerek kısalır.',
+      'Bugünün işini yarına bırakma.', 'Sen tekrar ettiğin şeysin.', 'Ateşi yakan kıvılcım, sürdüren odundur.',
+    ];
+    const quoteOfDay = () => { const d = new Date(); return QUOTES[(d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate()) % QUOTES.length]; };
+
     // ---------- Arayüz ----------
     function render() {
       const today = new Date(), tk = keyOf(today);
@@ -610,7 +688,7 @@
         <div class="ring"><svg viewBox="0 0 76 76"><circle class="track" cx="38" cy="38" r="32"/>
           <circle class="bar" cx="38" cy="38" r="32" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct)}"/></svg>
           <span>${done}/${due.length}</span></div>
-        <div><h2>${title}</h2><p>${sub}</p></div>`;
+        <div><h2>${title}</h2><p>${sub}</p><p class="quote">“${quoteOfDay()}”</p></div>`;
 
       renderOverview(all);
       $('#listTitle').innerHTML = habits.length ? `<span>Alışkanlıklar</span><span>${habits.length}</span>` : '';
@@ -626,14 +704,18 @@
           const d = addDays(today, -i), st = dayState(h, s.sets, d);
           week += `<button class="day ${st}${i === 0 ? ' today' : ''}" data-action="toggle" data-date="${keyOf(d)}" aria-label="${d.getDate()} ${MONTHS[d.getMonth()]}">${DAYS[d.getDay()].slice(0, 2)}<b></b></button>`;
         }
-        const streak = s.current ? `<span class="streak-pill">🔥 ${s.current} gün</span>` : `<span class="streak-pill zero">Seri yok</span>`;
+        const tier = flameTier(s.current);
+        const streak = s.current ? `<span class="streak-pill t${tier}"><span class="flame">🔥</span><span class="streak-num">${s.current} gün</span></span>` : `<span class="streak-pill zero">Seri yok</span>`;
+        const count = h.counts[tk] || 0;
+        const counter = h.target > 1 && !s.doneToday;
+        const checkInner = counter ? `<span class="count">${count}/${h.target}</span>` : ICON_CHECK;
         let extra = '';
         if (s.atRisk) extra = '<span class="risk">· bugün yap!</span>';
         else if (!s.dueToday && !s.doneToday) extra = '<span>· bugün izinli</span>';
         else if (s.best > s.current) extra = `<span>· en iyi ${s.best}</span>`;
         const open = openId === h.id;
         return `
-          <li class="card habit${s.doneToday ? ' done' : ''}${!s.dueToday && !s.doneToday ? ' rest' : ''}" style="--c:${h.color}" data-id="${h.id}">
+          <li class="card habit t${tier}${s.doneToday ? ' done' : ''}${!s.dueToday && !s.doneToday ? ' rest' : ''}" style="--c:${h.color}" data-id="${h.id}">
             <div class="habit-main" data-action="expand">
               <div class="emoji">${esc(h.emoji)}</div>
               <div class="info">
@@ -641,7 +723,8 @@
                 <div class="meta">${streak}${extra}</div>
                 <div class="week">${week}</div>
               </div>
-              <button class="check${popId === h.id ? ' pop' : ''}" data-action="toggle" data-date="${tk}" aria-label="Bugünü işaretle">${ICON_CHECK}</button>
+              ${counter && count ? '<button class="minus" data-action="minus" aria-label="Azalt">−</button>' : ''}
+              <button class="check${popId === h.id ? ' pop' : ''}${counter && count ? ' partial' : ''}" style="--p:${Math.round((count / h.target) * 100)}" data-action="check" aria-label="Bugünü işaretle">${checkInner}</button>
             </div>
             ${open ? detailsHTML(h, s, idx) : ''}
           </li>`;
@@ -768,6 +851,9 @@
       draft = { emoji: h ? h.emoji : EMOJIS[0], color: h ? h.color : COLORS[habits.length % COLORS.length], days: h ? h.days.slice() : ALL_DAYS.slice() };
       $('#habitDialogTitle').textContent = h ? 'Alışkanlığı düzenle' : 'Yeni alışkanlık';
       $('#habitName').value = h ? h.name : '';
+      $('#habitTarget').value = h ? h.target : 1;
+      $('#habitBackfill').value = '';
+      $('#habitBackfill').placeholder = h ? String(statsOf(h).current) : '0';
       paintPickers();
       $('#habitDialog').showModal();
       setTimeout(() => $('#habitName').focus(), 50);
@@ -794,8 +880,12 @@
       e.preventDefault();
       const name = $('#habitName').value.trim().slice(0, 60);
       if (!name) return;
-      if (editingId) Object.assign(find(editingId), { name, ...draft });
-      else habits.push({ id: Date.now(), name, ...draft, createdAt: Date.now(), history: [], skips: [] });
+      const target = Math.min(99, Math.max(1, parseInt($('#habitTarget').value, 10) || 1));
+      const back = Math.min(3650, Math.max(0, parseInt($('#habitBackfill').value, 10) || 0));
+      let h;
+      if (editingId) Object.assign((h = find(editingId)), { name, ...draft, target });
+      else habits.push((h = { id: Date.now(), name, ...draft, target, counts: {}, createdAt: Date.now(), history: [], skips: [] }));
+      if (back) { backfill(h, back); toast(`🔥 ${statsOf(h).current} günlük seri kaydedildi`); }
       $('#habitDialog').close();
       commit();
     });
@@ -881,6 +971,7 @@
       $('#modeInfo').textContent = mode === 'cloud'
         ? '☁️ Verilerin buluta kaydediliyor; tüm cihazlarında aynı.'
         : '📱 Bulut bağlantısı yok — veriler sadece bu tarayıcıda saklanıyor. Yedek indirmeyi unutma.';
+      $('#modeInfo').textContent += ' · Sürüm 4';
       paintRemind();
       $('#settingsDialog').showModal();
     }
@@ -926,6 +1017,8 @@
       const li = el.closest('.habit'); const id = li ? Number(li.dataset.id) : null;
       switch (el.dataset.action) {
         case 'toggle': toggleDone(id, el.dataset.date); break;
+        case 'check': checkToday(id); break;
+        case 'minus': minusToday(id); break;
         case 'cycle': cycleDay(id, el.dataset.date); break;
         case 'expand': openId = openId === id ? null : id; render(); break;
         case 'month': {
