@@ -77,6 +77,10 @@ async function handleApi(request, env) {
   if (!env.APP_PASSWORD) {
     return json({ error: 'APP_PASSWORD ayarlanmamış: Worker → Settings → Variables and Secrets kısmına ekle' }, 503);
   }
+  if (typeof env.APP_PASSWORD !== 'string') {
+    // Panelde aynı adla bir KV bağlantısı varsa env.APP_PASSWORD metin değil nesne olur ve şifre hiç eşleşmez
+    return json({ error: 'APP_PASSWORD bir Secret olmalı; Settings → Bindings kısmında aynı adlı KV bağlantısı varsa sil' }, 503);
+  }
   if (!sameSecret(request.headers.get('X-App-Password') || '', env.APP_PASSWORD)) {
     return json({ error: 'unauthorized' }, 401);
   }
