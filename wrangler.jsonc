@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mystreak",
+  "main": "src/worker.js",
+  "compatibility_date": "2025-09-01",
+  "assets": { "directory": "./public", "binding": "ASSETS" },
+  "kv_namespaces": [
+    // Cloudflare paneli -> Storage & Databases -> KV -> "mystreak" satırındaki ID
+    { "binding": "DB", "id": "973741a29f85459bb59b141ac5202f7c" }
+  ],
+  // Her 15 dakikada bir hatırlatma kontrolü
+  "triggers": { "crons": ["*/15 * * * *"] },
+  // Paneldeki değişkenler (APP_PASSWORD vb.) her deploy'da silinmesin
+  "keep_vars": true,
+  "observability": { "enabled": true }
+}
