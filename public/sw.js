@@ -1,6 +1,6 @@
 // myStreak service worker: çevrimdışı açılış + bildirimler
-const CACHE = 'mystreak-v4';
-const ASSETS = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-192.png'];
+const CACHE = 'mystreak-v5';
+const ASSETS = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-192.png', '/img/sprout.webp', '/img/snowflake.webp', '/img/scroll.webp'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

@@ -108,6 +108,9 @@
     .habits { list-style: none; display: flex; flex-direction: column; gap: 12px; }
     .habit { --c: var(--brand); overflow: hidden; }
     .habit-main { display: flex; align-items: center; gap: 14px; padding: 14px 14px 14px 16px; cursor: pointer; }
+    .ico { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .emoji .ico { width: 36px; height: 36px; }
+    .emojis .ico { width: 30px; height: 30px; margin: auto; }
     .emoji { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center; font-size: 22px; background: color-mix(in srgb, var(--c) 16%, transparent); }
     .info { flex: 1; min-width: 0; }
     .name { font-weight: 650; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -363,12 +366,17 @@
     const API = '/api/habits';
     const K = { cache: 'mystreak_cache_v2', dirty: 'mystreak_dirty', pass: 'mystreak_pass', theme: 'mystreak_theme', remind: 'mystreak_remind', overview: 'mystreak_overview' };
     const COLORS = ['#f97316', '#ef4444', '#ec4899', '#a855f7', '#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#84cc16', '#eab308'];
-    const EMOJIS = ['🔥', '📚', '💪', '🏃', '🧘', '💧', '🥗', '😴', '✍️', '💻', '🎸', '🧠', '🚭', '🙏', '🌅', '💰'];
+    const EMOJIS = ['img:books', 'img:book-heart', 'img:sprout', 'img:scroll', '🔥', '📚', '💪', '🏃', '🧘', '💧', '🥗', '😴', '✍️', '💻', '🧠', '🚭'];
+    // Uygulamaya özel 3D görseller (public/img); bildirimde ve metinlerde yerlerine emoji kullanılır
+    const IMAGE_ICONS = { books: '📚', 'book-heart': '📖', sprout: '🌱', scroll: '📜', snowflake: '❄️' };
+    const iconName = (e) => (typeof e === 'string' && e.startsWith('img:') && IMAGE_ICONS[e.slice(4)] ? e.slice(4) : null);
+    const iconHTML = (e) => (iconName(e) ? `<img class="ico" src="img/${iconName(e)}.webp" alt="">` : esc(e));
+    const iconText = (e) => (iconName(e) ? IMAGE_ICONS[iconName(e)] : e);
     const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
     const DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];   // getDay() sırası
     const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];                          // ekranda Pazartesi başlar
     const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
-    const MILESTONES = [[3, '🌱'], [7, '⭐'], [14, '💫'], [30, '🏅'], [60, '🥈'], [100, '🥇'], [200, '💎'], [365, '👑']];
+    const MILESTONES = [[3, 'img:sprout'], [7, '⭐'], [14, '💫'], [30, '🏅'], [60, '🥈'], [100, '🥇'], [200, '💎'], [365, '👑']];
     const HEAT_WEEKS = 18;
     const ICON_CHECK = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
     const ICON_LEFT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>';
@@ -634,8 +642,8 @@
       if (navigator.vibrate) navigator.vibrate(12);
       const s = statsOf(h);
       const m = MILESTONES.find(([n]) => n === s.current);
-      if (m) toast(`${m[1]} ${s.current} günlük seri! Yeni rozet kazandın`);
-      else if (s.current > 1 && s.current === s.best) toast(`${h.emoji} Rekor! ${s.current} gün 🔥`);
+      if (m) toast(`${iconText(m[1])} ${s.current} günlük seri! Yeni rozet kazandın`);
+      else if (s.current > 1 && s.current === s.best) toast(`${iconText(h.emoji)} Rekor! ${s.current} gün 🔥`);
       if (!wasAllDone && allDoneToday()) { confetti(); if (!m) toast('Bugün hepsi tamam! 🎉'); }
       else if (m) confetti(60);
     }
@@ -688,14 +696,14 @@
         <div class="ring"><svg viewBox="0 0 76 76"><circle class="track" cx="38" cy="38" r="32"/>
           <circle class="bar" cx="38" cy="38" r="32" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct)}"/></svg>
           <span>${done}/${due.length}</span></div>
-        <div><h2>${title}</h2><p>${sub}</p><p class="quote">“${quoteOfDay()}”</p></div>`;
+        <div><h2>${title}</h2><p>${sub}</p><p class="quote"><img src="img/scroll.webp" alt="" style="width:18px;height:18px;vertical-align:-4px;margin-right:4px">“${quoteOfDay()}”</p></div>`;
 
       renderOverview(all);
       $('#listTitle').innerHTML = habits.length ? `<span>Alışkanlıklar</span><span>${habits.length}</span>` : '';
 
       const list = $('#habits');
       if (!habits.length) {
-        list.innerHTML = `<li class="empty"><div>🌱</div><h3>Henüz alışkanlık yok</h3><p>Aşağıdaki butona dokunarak başla.</p></li>`;
+        list.innerHTML = `<li class="empty"><div><img src="img/sprout.webp" alt="" style="width:96px;height:96px;margin:0 auto"></div><h3>Henüz alışkanlık yok</h3><p>Aşağıdaki butona dokunarak başla.</p></li>`;
         return;
       }
       list.innerHTML = all.map(([h, s], idx) => {
@@ -711,13 +719,13 @@
         const checkInner = counter ? `<span class="count">${count}/${h.target}</span>` : ICON_CHECK;
         let extra = '';
         if (s.atRisk) extra = '<span class="risk">· bugün yap!</span>';
-        else if (!s.dueToday && !s.doneToday) extra = '<span>· bugün izinli</span>';
+        else if (!s.dueToday && !s.doneToday) extra = '<span>· <img src="img/snowflake.webp" alt="" style="width:14px;height:14px;vertical-align:-2px"> bugün izinli</span>';
         else if (s.best > s.current) extra = `<span>· en iyi ${s.best}</span>`;
         const open = openId === h.id;
         return `
           <li class="card habit t${tier}${s.doneToday ? ' done' : ''}${!s.dueToday && !s.doneToday ? ' rest' : ''}" style="--c:${h.color}" data-id="${h.id}">
             <div class="habit-main" data-action="expand">
-              <div class="emoji">${esc(h.emoji)}</div>
+              <div class="emoji">${iconHTML(h.emoji)}</div>
               <div class="info">
                 <div class="name">${esc(h.name)}</div>
                 <div class="meta">${streak}${extra}</div>
@@ -785,7 +793,7 @@
         cal += `<button class="${st}${k === tk ? ' today' : ''}" data-action="cycle" data-date="${k}"${k > tk ? ' disabled' : ''}>${d}</button>`;
       }
       const isCurrentMonth = v.y === today.getFullYear() && v.m === today.getMonth();
-      const badges = MILESTONES.map(([n, e]) => `<div class="badge${s.best >= n ? ' got' : ''}"><div>${e}</div>${n} gün</div>`).join('');
+      const badges = MILESTONES.map(([n, e]) => `<div class="badge${s.best >= n ? ' got' : ''}"><div>${iconHTML(e)}</div>${n} gün</div>`).join('');
       const next = MILESTONES.find(([n]) => n > s.current);
       const plan = h.days.length === 7 ? 'Her gün' : WEEK_ORDER.filter((d) => h.days.includes(d)).map((d) => DAYS[d]).join(', ');
       return `
@@ -797,7 +805,7 @@
             <div class="stat"><b>%${s.rate}</b><span>Son 30 gün</span></div>
           </div>
           <div class="badges">${badges}</div>
-          <p class="next-badge">${next ? `Sonraki rozet ${next[1]} ${next[0]} gün — ${next[0] - s.current} gün kaldı` : 'Tüm rozetleri topladın! 👑'} · Plan: ${plan}</p>
+          <p class="next-badge">${next ? `Sonraki rozet ${iconText(next[1])} ${next[0]} gün — ${next[0] - s.current} gün kaldı` : 'Tüm rozetleri topladın! 👑'} · Plan: ${plan}</p>
           <div class="cal-head">
             <button data-action="month" data-dir="-1" aria-label="Önceki ay">${ICON_LEFT}</button>
             <span>${MONTHS[v.m]} ${v.y}</span>
@@ -806,7 +814,7 @@
           <div class="cal">${cal}</div>
           <div class="cal-legend">
             <span><i style="background:var(--c)"></i>Yapıldı</span>
-            <span><i style="background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 35%,transparent) 0 3px,transparent 3px 6px)"></i>İzinli (seri bozulmaz)</span>
+            <span><i style="background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 35%,transparent) 0 3px,transparent 3px 6px)"></i><img src="img/snowflake.webp" alt="" style="width:14px;height:14px"> İzinli (seri bozulmaz)</span>
             <span><i style="box-shadow:inset 0 0 0 1.5px var(--border)"></i>Plan dışı</span>
           </div>
           <p class="hint">Güne dokun: yapıldı → izinli → boş. Hastalık, tatil gibi günlerde "izinli" işaretle; serin bozulmaz.</p>
@@ -860,7 +868,7 @@
     }
     function paintPickers() {
       const emojis = EMOJIS.includes(draft.emoji) ? EMOJIS : [draft.emoji, ...EMOJIS.slice(0, -1)];
-      $('#emojiPicker').innerHTML = emojis.map((e) => `<button type="button" data-emoji="${esc(e)}" class="${e === draft.emoji ? 'sel' : ''}">${esc(e)}</button>`).join('');
+      $('#emojiPicker').innerHTML = emojis.map((e) => `<button type="button" data-emoji="${esc(e)}" class="${e === draft.emoji ? 'sel' : ''}">${iconHTML(e)}</button>`).join('');
       $('#colorPicker').innerHTML = COLORS.map((c) => `<button type="button" data-color="${c}" style="background:${c}" class="${c === draft.color ? 'sel' : ''}" aria-label="${c}"></button>`).join('');
       $('#dayPicker').innerHTML = WEEK_ORDER.map((d) => `<button type="button" data-day="${d}" class="${draft.days.includes(d) ? 'sel' : ''}">${DAYS[d]}</button>`).join('');
     }
