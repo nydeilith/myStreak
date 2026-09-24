@@ -337,6 +337,10 @@
     .capture { padding: 10px 10px 12px 14px; margin-bottom: 22px; }
     .capture-row { display: flex; gap: 8px; align-items: center; }
     .capture input[type="text"] { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 1rem; padding: 10px 0; outline: none; }
+    .capture .mic { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); background: var(--surface-2); position: relative; transition: color .2s, background .2s; }
+    .capture .mic.on { color: #fff; background: var(--danger); }
+    .capture .mic.on::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--danger); animation: burst 1.1s ease-out infinite; }
+    .capture.listening input[type="text"]::placeholder { color: var(--danger); }
     .capture .send { flex: none; padding: 10px 16px; border-radius: 12px; background: var(--text); color: var(--bg); font-weight: 700; font-size: .88rem; }
     .chips { display: flex; gap: 6px; overflow-x: auto; padding-top: 6px; scrollbar-width: none; }
     .chips::-webkit-scrollbar { display: none; }
@@ -378,6 +382,25 @@
     .stepper { display: flex; gap: 8px; margin-top: 12px; }
     .stepper .btn { flex: none; min-width: 48px; font-size: 1.1rem; }
     .goal.done { opacity: .75; }
+    /* Seçim kartları (açılır liste yerine) */
+    .choice { display: flex; flex-wrap: wrap; gap: 8px; }
+    .choice button { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px 9px 10px; border-radius: 14px; border: 1.5px solid var(--border); background: var(--surface-2); font-size: .88rem; font-weight: 600; color: var(--muted); transition: border-color .2s, color .2s, background .2s, transform .15s; }
+    .choice button:active { transform: scale(.95); }
+    .choice button .ico, .choice button .ce { width: 22px; height: 22px; font-size: 16px; display: grid; place-items: center; }
+    .choice button.sel { border-color: var(--cc, var(--text)); color: var(--text); background: color-mix(in srgb, var(--cc, var(--text)) 14%, var(--surface-2)); }
+    /* Sayı alanlarında tarayıcı okları yok */
+    input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .time-btn { padding: 8px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); font-family: var(--display); font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    /* Alt sayfayı aşağı çekerek kapatma */
+    dialog.sheet-dlg.dragging { animation: none !important; transition: none; }
+    dialog.sheet-dlg.snap { transition: transform .25s cubic-bezier(.2,.8,.2,1); }
+    dialog.sheet-dlg::before { cursor: grab; }
+    /* Odak süresi seçimi */
+    .focus-opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+    .focus-opts button { padding: 16px 0; border-radius: 16px; background: var(--surface-2); font-family: var(--display); font-size: 1.2rem; font-weight: 800; }
+    .focus-opts button span { display: block; font-family: 'DM Sans', sans-serif; font-size: .7rem; font-weight: 600; color: var(--muted); }
+    .focus-opts button:active { transform: scale(.94); }
     .field select, .field input[type="date"] { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); outline: none; font-size: 1rem; }
 
     /* Tanıtım */
@@ -517,7 +540,7 @@
     .error { color: var(--danger); font-size: .82rem; margin-top: -8px; margin-bottom: 12px; min-height: 1em; }
     .remind { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; }
     .remind-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: 600; font-size: .92rem; }
-    .remind-row input[type="time"] { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; outline: none; }
+    
     .remind .hint { margin: 8px 0 0; }
     .remind .btn { margin-top: 10px; background: var(--surface); width: 100%; }
     .switch { position: relative; width: 46px; height: 28px; flex: none; }
@@ -569,6 +592,7 @@
       <form class="card capture" id="captureForm" autocomplete="off">
         <div class="capture-row">
           <input type="text" id="captureText" maxlength="280" placeholder="Aklından ne geçiyor?" enterkeyhint="done">
+          <button type="button" class="mic" id="micBtn" data-action="voice" aria-label="Sesli not" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
           <button type="submit" class="send">Bırak</button>
         </div>
         <div class="chips" id="whenChips"></div>
@@ -607,6 +631,24 @@
     <button class="sheet-item" data-action="add-habit"><img src="img/flame.webp" alt=""><div><b>Alışkanlık</b><span>Her gün ya da belli günlerde yapacağın bir şey</span></div></button>
     <button class="sheet-item" data-action="add-note"><img src="img/brain.webp" alt=""><div><b>Aklıma not</b><span>Unutmak istemediğin bir iş, istersen saatli</span></div></button>
     <button class="sheet-item" data-action="add-goal"><img src="img/target.webp" alt=""><div><b>Hedef</b><span>Ulaşmak istediğin bir sonuç</span></div></button>
+  </dialog>
+
+  <!-- Kısayoldan odak: hangi alışkanlık? -->
+  <dialog id="focusPick" class="sheet-dlg">
+    <h3>Hangi alışkanlık için odak?</h3>
+    <div id="focusPickList"></div>
+  </dialog>
+
+  <!-- Odak süresi -->
+  <dialog id="focusSheet" class="sheet-dlg">
+    <h3 id="focusTitle">Odak süresi</h3>
+    <div class="focus-opts">
+      <button type="button" data-min="5">5<span>dk</span></button><button type="button" data-min="10">10<span>dk</span></button>
+      <button type="button" data-min="15">15<span>dk</span></button><button type="button" data-min="20">20<span>dk</span></button>
+      <button type="button" data-min="25">25<span>dk</span></button><button type="button" data-min="30">30<span>dk</span></button>
+      <button type="button" data-min="45">45<span>dk</span></button><button type="button" data-min="60">60<span>dk</span></button>
+    </div>
+    <div class="remind-row" style="font-weight:500;font-size:.88rem"><label class="switch"><input type="checkbox" id="focusRemember" checked><span></span></label><span style="flex:1">Bu süreyi alışkanlığa kaydet (karttaki ▶ doğrudan başlatsın)</span></div>
   </dialog>
 
   <!-- Aylık özet kartı -->
@@ -653,7 +695,7 @@
       </div>
       <div class="field">
         <label for="goalHabit" class="field-label">İlerleme nasıl sayılsın?</label>
-        <select id="goalHabit"></select>
+        <div class="choice" id="goalHabit" data-value=""></div>
         <p class="hint">Bir alışkanlık seçersen, onu yaptığın her gün (geçmiş günler dahil) hedefe +1 sayılır. Elle takipte ilerlemeyi + / − ile girersin.</p>
       </div>
       <div class="field">
@@ -723,7 +765,7 @@
         </div>
         <div class="remind-row" style="margin-top:10px;font-weight:500">
           <span style="flex:1">Alışkanlık hatırlatması</span>
-          <input type="time" id="remindTime" value="21:00">
+          <button type="button" class="time-btn" id="remindTime" data-value="21:00">21:00</button>
         </div>
         <p class="hint" id="remindInfo"></p>
         <button class="btn" data-action="test-push" id="testPushBtn" hidden>Test bildirimi gönder</button>
@@ -1463,6 +1505,7 @@
           <div class="detail-actions">
             <button class="btn" data-action="up"${idx === 0 ? ' disabled' : ''} aria-label="Yukarı taşı">↑</button>
             <button class="btn" data-action="down"${idx === habits.length - 1 ? ' disabled' : ''} aria-label="Aşağı taşı">↓</button>
+            <button class="btn" data-action="focus"${s.doneToday ? ' disabled' : ''}>▶ Odak</button>
             <button class="btn" data-action="edit">Düzenle</button>
             <button class="btn danger" data-action="delete">Sil</button>
           </div>
@@ -1670,7 +1713,7 @@
       $('#goalTarget').value = g ? g.target : 10;
       $('#goalUnit').value = g ? g.unit : '';
       setDateField($('#goalDeadline'), g && g.deadline ? g.deadline : '');
-      $('#goalHabit').innerHTML = '<option value="">Elle takip ( + / − )</option>' + habits.map((h) => `<option value="${h.id}"${g && g.habitId === h.id ? ' selected' : ''}>${esc(iconText(h.emoji))} ${esc(h.name)}</option>`).join('');
+      paintChoice($('#goalHabit'), [['', '<span class="ce">±</span>Elle takip', ''], ...habits.map((h) => [String(h.id), `<span class="ce">${iconHTML(h.emoji)}</span>${esc(h.name)}`, h.color])], g && g.habitId ? String(g.habitId) : '');
       $('#goalDeleteBtn').hidden = !g;
       $('#goalDialog').showModal();
       setTimeout(() => $('#goalTitle').focus(), 50);
@@ -1679,7 +1722,7 @@
       e.preventDefault();
       const title = $('#goalTitle').value.trim().slice(0, 80);
       if (!title) return;
-      const habitId = Number($('#goalHabit').value) || null;
+      const habitId = Number($('#goalHabit').dataset.value) || null;
       const fields = {
         title, habitId,
         target: Math.min(100000, Math.max(1, parseInt($('#goalTarget').value, 10) || 1)),
@@ -1712,7 +1755,7 @@
     }
     function saveObInputs() {
       document.querySelectorAll('#onboard [data-days]').forEach((i) => { ob.picks[i.dataset.days] = Math.max(0, parseInt(i.value, 10) || 0); });
-      ['title', 'target', 'unit', 'link'].forEach((k) => { const el = $('#ob-goal-' + k); if (el) ob.goal[k] = el.value; });
+      ['title', 'target', 'unit', 'link'].forEach((k) => { const el = $('#ob-goal-' + k); if (el) ob.goal[k] = k === 'link' ? el.dataset.value : el.value; });
       const dl = $('#ob-goal-deadline'); if (dl) ob.goal.deadline = dl.dataset.value || '';
     }
     function renderOnboarding() {
@@ -1739,11 +1782,12 @@
         art = 'target'; title = 'Bir hedefin var mı?';
         lead = 'Uzun vadeli bir hedef koy. İstersen bir alışkanlığa bağla, her yaptığın gün hedefe sayılsın.';
         const g = ob.goal;
-        const linkOpts = '<option value="">Elle takip</option>' + Object.keys(ob.picks).map((i) => `<option value="${i}"${g.link === i ? ' selected' : ''}>${TEMPLATES[i].name}</option>`).join('');
+        const linkOpts = [['', '<span class="ce">±</span>Elle takip', ''], ...Object.keys(ob.picks).map((i) => [i, `<span class="ce">${iconHTML(TEMPLATES[i].emoji)}</span>${TEMPLATES[i].name}`, TEMPLATES[i].color])]
+          .map(([v, l, c]) => `<button type="button" class="${g.link === v ? 'sel' : ''}" data-choice="${v}"${c ? ` style="--cc:${c}"` : ''}>${l}</button>`).join('');
         body = `<div class="field"><label for="ob-goal-title">Hedef</label><input type="text" id="ob-goal-title" maxlength="80" placeholder="ör. 100 gün kitap okumak" value="${esc(g.title)}"></div>
           <div class="field row2"><div><label class="field-label" for="ob-goal-target">Hedef sayı</label><input type="number" id="ob-goal-target" min="1" value="${esc(g.target)}" placeholder="100"></div>
           <div><label class="field-label" for="ob-goal-unit">Birim</label><input type="text" id="ob-goal-unit" maxlength="16" value="${esc(g.unit)}" placeholder="gün"></div></div>
-          <div class="field"><label class="field-label" for="ob-goal-link">İlerleme</label><select id="ob-goal-link">${linkOpts}</select></div>
+          <div class="field"><label class="field-label" for="ob-goal-link">İlerleme</label><div class="choice" id="ob-goal-link" data-value="${esc(g.link)}">${linkOpts}</div></div>
           <div class="field"><label class="field-label" for="ob-goal-deadline">Bitiş tarihi (isteğe bağlı)</label><button type="button" class="date-field" id="ob-goal-deadline" data-action="pick-deadline" data-value="${esc(g.deadline)}">${g.deadline ? dateLabel(g.deadline) : 'Tarih seç'}</button></div>`;
         actions = '<button class="btn" data-action="ob-skip-goal">Şimdilik yok</button><button class="btn primary" data-action="ob-next">Devam</button>';
       } else {
@@ -1808,7 +1852,8 @@
     let timerTick = null;
     const timerState = () => { try { return JSON.parse(store.get(TK)); } catch (e) { return null; } };
     function startTimer(id) {
-      const h = find(id); if (!h || !h.minutes) return;
+      const h = find(id); if (!h) return;
+      if (!h.minutes) return openFocusSheet(id);
       store.set(TK, JSON.stringify({ id, total: h.minutes * 60e3, endsAt: Date.now() + h.minutes * 60e3, left: null }));
       if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {});
       showTimer();
@@ -1820,7 +1865,7 @@
       el.style.setProperty('--c', h.color);
       $('#tmEmoji').innerHTML = iconHTML(h.emoji);
       $('#tmName').textContent = h.name;
-      $('#tmSub').textContent = `${h.minutes} dakikalık odak`;
+      $('#tmSub').textContent = `${Math.round(t.total / 60e3)} dakikalık odak`;
       el.classList.remove('closing');
       el.hidden = false;
       clearInterval(timerTick);
@@ -1991,6 +2036,119 @@
       const a = document.createElement('a'); a.href = mc.url; a.download = file.name; a.click();
     }
 
+    // ---------- Seçim kartları ----------
+    function paintChoice(el, opts, value) {
+      el.dataset.value = value;
+      el.innerHTML = opts.map(([v, label, c]) => `<button type="button" class="${v === value ? 'sel' : ''}" data-choice="${v}"${c ? ` style="--cc:${c}"` : ''}>${label}</button>`).join('');
+    }
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-choice]'); if (!b) return;
+      const box = b.closest('.choice');
+      box.dataset.value = b.dataset.choice;
+      box.querySelectorAll('[data-choice]').forEach((x) => x.classList.toggle('sel', x === b));
+    });
+
+    // ---------- Alt sayfaları aşağı çekerek kapatma ----------
+    {
+      let drag = null;
+      document.addEventListener('touchstart', (e) => {
+        const d = e.target.closest('dialog.sheet-dlg');
+        if (!d || !d.open) return;
+        const r = d.getBoundingClientRect(), y = e.touches[0].clientY;
+        // Tutamak bölgesinden (üst 56px) ya da sayfa en üstteyken her yerden çekilebilir
+        if (y - r.top > 56 && d.scrollTop > 0) return;
+        if (e.target.closest('input, textarea, .cal, .choice, .emojis, .colors, .weekdays, .dp-wheel')) return;
+        drag = { d, y0: y, t0: performance.now(), dy: 0 };
+      }, { passive: true });
+      document.addEventListener('touchmove', (e) => {
+        if (!drag) return;
+        drag.dy = Math.max(0, e.touches[0].clientY - drag.y0);
+        if (drag.dy > 4) { drag.d.classList.add('dragging'); drag.d.style.transform = `translateY(${drag.dy}px)`; }
+      }, { passive: true });
+      document.addEventListener('touchend', () => {
+        if (!drag) return;
+        const { d, dy, t0 } = drag; drag = null;
+        const fast = dy > 60 && dy / (performance.now() - t0) > 0.6;
+        d.classList.remove('dragging');
+        if (dy > 130 || fast) {
+          d.classList.add('snap'); d.style.transform = 'translateY(100%)';
+          setTimeout(() => {
+            // Kapanış animasyonu zaten oynadı: .closing ile ikinci animasyonu atlayıp doğrudan kapat
+            d.classList.add('closing');
+            HTMLDialogElement.prototype.close.call(d);
+            d.classList.remove('closing', 'snap'); d.style.transform = '';
+          }, 240);
+        } else if (dy > 0) {
+          d.classList.add('snap'); d.style.transform = '';
+          setTimeout(() => d.classList.remove('snap'), 260);
+        }
+      });
+    }
+
+    // ---------- Sesli not (Web Speech API) ----------
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let rec = null;
+    if (SR) $('#micBtn').hidden = false;
+    function toggleVoice() {
+      if (!SR) return toast('Bu tarayıcı sesli yazmayı desteklemiyor');
+      if (rec) { rec.stop(); return; }
+      const input = $('#captureText'), before = input.value.trim();
+      rec = new SR();
+      rec.lang = 'tr-TR'; rec.interimResults = true; rec.continuous = false;
+      rec.onresult = (e) => {
+        const text = Array.from(e.results).map((r) => r[0].transcript).join(' ').trim();
+        input.value = (before ? before + ' ' : '') + text;
+      };
+      const stop = () => { rec = null; $('#micBtn').classList.remove('on'); $('#captureForm').classList.remove('listening'); input.placeholder = 'Aklından ne geçiyor?'; };
+      rec.onend = () => { stop(); if (input.value.trim()) input.focus(); };
+      rec.onerror = (e) => { stop(); if (e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('Mikrofon izni verilmedi'); else if (e.error !== 'aborted' && e.error !== 'no-speech') toast('Ses anlaşılamadı, tekrar dene'); };
+      $('#micBtn').classList.add('on'); $('#captureForm').classList.add('listening');
+      input.placeholder = 'Dinliyorum…';
+      if (navigator.vibrate) navigator.vibrate(10);
+      try { rec.start(); } catch (e) { stop(); }
+    }
+
+    // ---------- Ana ekran kısayolları (?a=note|voice|focus|habit) ----------
+    function openFocusPick() {
+      const tk = todayKey();
+      const list = habits.filter((h) => !h.history.includes(tk));
+      if (!list.length) return toast('Bugün hepsini bitirdin');
+      if (list.length === 1) return startTimer(list[0].id);
+      $('#focusPickList').innerHTML = list.map((h) => `<button class="sheet-item" data-pick="${h.id}"><div class="emoji" style="--c:${h.color};background:color-mix(in srgb, ${h.color} 16%, transparent)">${iconHTML(h.emoji)}</div><div><b>${esc(h.name)}</b><span>${h.minutes ? h.minutes + ' dakika' : 'Süre seçeceksin'}</span></div></button>`).join('');
+      $('#focusPick').showModal();
+    }
+    $('#focusPick').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-pick]'); if (!b) return;
+      $('#focusPick').close();
+      setTimeout(() => startTimer(Number(b.dataset.pick)), 220);
+    });
+    function handleShortcut() {
+      const a = new URLSearchParams(location.search).get('a');
+      if (!a) return;
+      history.replaceState(null, '', location.pathname + location.hash);
+      if (a === 'note' || a === 'voice') { setTab('aklimda'); setTimeout(() => { $('#captureText').focus(); if (a === 'voice') toggleVoice(); }, 300); }
+      else if (a === 'focus') { setTab('bugun'); openFocusPick(); }
+      else if (a === 'habit') { setTab('bugun'); openHabitDialog(); }
+    }
+
+    // ---------- Odak süresi seçimi ----------
+    function openFocusSheet(id) {
+      focusFor = id;
+      const h = find(id);
+      $('#focusTitle').textContent = h ? `${h.name} için odak süresi` : 'Odak süresi';
+      $('#focusRemember').checked = true;
+      $('#focusSheet').showModal();
+    }
+    let focusFor = null;
+    $('#focusSheet').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-min]'); if (!b || !focusFor) return;
+      const h = find(focusFor), m = Number(b.dataset.min);
+      if ($('#focusRemember').checked) { h.minutes = m; commit(); }
+      $('#focusSheet').close();
+      store.set(TK, JSON.stringify({ id: h.id, total: m * 60e3, endsAt: Date.now() + m * 60e3, left: null }));
+      showTimer();
+    });
+
     // ---------- Tarih / saat seçici ----------
     const dateLabel = (k) => { const d = parseKey(k); return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
     function setDateField(el, key) {
@@ -2000,12 +2158,18 @@
     }
     let dp = null;
     // value: 'YYYY-MM-DD' ya da ms; time: saat de seçilsin mi. Döner: {date, minutes} | null (temizle) | undefined (vazgeç)
-    function pickDate({ value, time = false, min = null, title = 'Tarih seç', quick } = {}) {
+    function pickDate({ value, time = false, min = null, title = 'Tarih seç', quick, timeOnly = false, minutes } = {}) {
+      if (timeOnly) time = true;
       const base = value ? (typeof value === 'number' ? new Date(value) : parseKey(value)) : new Date();
       dp = { sel: value ? keyOf(base) : null, y: base.getFullYear(), m: base.getMonth(), time, min,
         minutes: time ? (value ? base.getHours() * 60 + base.getMinutes() : 20 * 60) : 0, dir: null };
       $('#dpTitle').textContent = title;
       $('#dpTime').hidden = !time;
+      dp.timeOnly = timeOnly;
+      if (timeOnly) { dp.sel = todayKey(); if (minutes != null) dp.minutes = minutes; }
+      ['#dpQuick', '#dpGrid'].forEach((q) => { $(q).hidden = timeOnly; });
+      $('#datePicker .cal-head').hidden = timeOnly;
+      $('[data-dp-clear]').hidden = timeOnly;
       const t = new Date();
       const q = quick || (time
         ? [['Bugün', 0], ['Yarın', 1], ['Hafta sonu', (6 - t.getDay() + 7) % 7 || 7], ['1 hafta sonra', 7]]
@@ -2031,7 +2195,7 @@
       dp.dir = null;
       $('#dpH').textContent = pad(Math.floor(dp.minutes / 60));
       $('#dpM').textContent = pad(dp.minutes % 60);
-      $('#dpResult').textContent = dp.sel ? dateLabel(dp.sel) + (dp.time ? ` · ${pad(Math.floor(dp.minutes / 60))}:${pad(dp.minutes % 60)}` : '') : 'Bir gün seç';
+      $('#dpResult').textContent = dp.timeOnly ? 'Her gün bu saatte' : dp.sel ? dateLabel(dp.sel) + (dp.time ? ` · ${pad(Math.floor(dp.minutes / 60))}:${pad(dp.minutes % 60)}` : '') : 'Bir gün seç';
     }
     function finishPicker(result) {
       if (!dp) return;
@@ -2049,7 +2213,7 @@
       else if (b.hasAttribute('data-dp-clear')) finishPicker(null);
       else if (b.hasAttribute('data-dp-ok')) {
         if (!dp.sel) return toast('Bir gün seç');
-        if (dp.time && parseKey(dp.sel).getTime() + dp.minutes * 60e3 < Date.now()) return toast('Geçmiş bir saat seçtin');
+        if (dp.time && !dp.timeOnly && parseKey(dp.sel).getTime() + dp.minutes * 60e3 < Date.now()) return toast('Geçmiş bir saat seçtin');
         finishPicker({ date: dp.sel, minutes: dp.minutes });
       }
     });
@@ -2166,7 +2330,7 @@
     function paintRemind(msg) {
       const prefs = remindPrefs();
       $('#remindOn').checked = prefs.on;
-      $('#remindTime').value = prefs.time;
+      $('#remindTime').dataset.value = prefs.time; $('#remindTime').textContent = prefs.time;
       $('#testPushBtn').hidden = !prefs.on;
       let info = msg;
       if (!info) {
@@ -2194,7 +2358,7 @@
       await pushApi('subscribe', sub, time);
     }
     async function onRemindChange() {
-      const on = $('#remindOn').checked, time = $('#remindTime').value || '21:00';
+      const on = $('#remindOn').checked, time = $('#remindTime').dataset.value || '21:00';
       $('#remindInfo').textContent = 'Kaydediliyor…';
       try {
         if (on) await enableReminders(time);
@@ -2214,7 +2378,15 @@
       if (e.target.checked) settings.freezeFrom = todayKey();
       commit();
     });
-    $('#remindTime').addEventListener('change', () => { if ($('#remindOn').checked) onRemindChange(); else store.set(K.remind, JSON.stringify({ on: false, time: $('#remindTime').value })); });
+    $('#remindTime').addEventListener('click', () => {
+      const [hh, mm] = ($('#remindTime').dataset.value || '21:00').split(':').map(Number);
+      pickDate({ timeOnly: true, minutes: hh * 60 + mm, title: 'Hatırlatma saati' }).then((r) => {
+        if (!r) return;
+        const t = `${pad(Math.floor(r.minutes / 60))}:${pad(r.minutes % 60)}`;
+        $('#remindTime').dataset.value = t; $('#remindTime').textContent = t;
+        if ($('#remindOn').checked) onRemindChange(); else store.set(K.remind, JSON.stringify({ on: false, time: t }));
+      });
+    });
     async function testPush() {
       try {
         const sub = await currentSubscription();
@@ -2232,7 +2404,7 @@
       $('#modeInfo').textContent = mode === 'cloud'
         ? 'Verilerin buluta kaydediliyor; tüm cihazlarında aynı.'
         : 'Bulut bağlantısı yok; veriler sadece bu tarayıcıda. Yedek indirmeyi unutma.';
-      $('#modeInfo').textContent += ' · Sürüm 8';
+      $('#modeInfo').textContent += ' · Sürüm 10';
       paintRemind();
       $('#freezeOn').checked = settings.freezeOn !== false;
       $('#settingsDialog').showModal();
@@ -2304,6 +2476,8 @@
         }
         case 'month-share': shareMonthCard(); break;
         case 'timer': startTimer(id); break;
+        case 'focus': openFocusSheet(id); break;
+        case 'voice': toggleVoice(); break;
         case 'timer-pause': pauseTimer(); break;
         case 'timer-finish': finishTimer(false); break;
         case 'timer-cancel': if (confirm('Sayaç durdurulsun mu? Alışkanlık işaretlenmeyecek.')) closeTimer(); break;
@@ -2405,7 +2579,7 @@
     });
 
     if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('/sw.js').catch(console.error);
-    load().then(() => { if (timerState()) showTimer(); });
+    load().then(() => { if (timerState()) showTimer(); handleShortcut(); });
     if (tab === 'aklimda') ensureBrain();
   </script>
 </body>

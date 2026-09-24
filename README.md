@@ -11,6 +11,8 @@ Alışkanlık / seri (streak) takip uygulaması. Cloudflare Workers üzerinde ç
 - **Ruh hali ve günün notu:** Her gün 1–5 ruh hali ve tek satır not; "Son bir yıl" grafiğinde ruh hali görünümü ve hangi alışkanlığın iyi günlerle birlikte gittiği.
 - **Seri koruyucu:** Aktif serin varken kaçırılan planlı gün ayda 2 kez otomatik korunur; uygulamada ve ertesi günkü bildirimde haber verilir. Ayarlar'dan kapatılabilir.
 - **Aylık özet kartı:** Instagram hikâyesi boyutunda (1080×1920) paylaşılabilir görsel.
+- **Sesli not:** Aklımda'daki mikrofon butonuyla konuşarak not (Türkçe konuşma tanıma; Chrome/Android ve Safari/iOS).
+- **Ana ekran kısayolları:** Simgeye basılı tutunca Aklıma not, Sesli not, Odak başlat, Yeni alışkanlık (uygulama ana ekrana eklendiyse; en iyi Android'de çalışır).
 - **Nottan alışkanlığa:** Aklımda'daki bir notu tek dokunuşla alışkanlığa çevirme.
 - **Hedeflerim:** Uzun vadeli hedefler; elle (+/−) ya da bir alışkanlığa bağlı sayılır, bitiş tarihine göre "yolundasın / geridesin" hesabı.
 - **Tanıtım:** İlk açılışta hazır alışkanlık şablonları, "kaç gündür yapıyorsun?", ilk hedef ve bildirim izni.
