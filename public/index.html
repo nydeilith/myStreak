@@ -101,13 +101,16 @@
     .legend { display: flex; justify-content: flex-end; align-items: center; gap: 3px; margin-top: 8px; font-size: .66rem; color: var(--muted); }
     .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
     .overview.collapsed .ov-body { display: none; }
+    .ov-body.anim { animation: rowsIn .34s cubic-bezier(.2,.8,.2,1); display: grid; }
+    .ov-body.closing { animation: rowsOut .24s ease-in forwards; display: grid; }
+    .ov-body > .ov-inner { min-height: 0; overflow: hidden; }
     .overview.collapsed .ov-head { margin-bottom: 0; }
 
     .section-title { display: flex; justify-content: space-between; align-items: baseline; margin: 0 4px 10px; font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 
     /* Habit card */
     .habits { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-    .habit { --c: var(--brand); overflow: hidden; }
+    .habit { --c: var(--brand); overflow: hidden; background: linear-gradient(120deg, color-mix(in srgb, var(--c) 10%, var(--surface)) 0%, var(--surface) 58%); transition: background .3s; }
     .habit-main { display: flex; align-items: center; gap: 14px; padding: 14px 14px 14px 16px; cursor: pointer; }
     .ico { width: 100%; height: 100%; object-fit: contain; display: block; }
     .emoji .ico { width: 36px; height: 36px; }
@@ -139,18 +142,30 @@
     .day b { width: 22px; height: 22px; border-radius: 7px; background: var(--surface-2); display: block; transition: transform .15s, background .2s; }
     .day.on b { background: var(--c); }
     .day.off b { background: transparent; box-shadow: inset 0 0 0 1.5px var(--border); }
-    .day.skip b, .cal button.skip { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 35%, transparent) 0 3px, transparent 3px 6px); }
+    .day.skip b { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 35%, transparent) 0 3px, transparent 3px 6px); }
     .day.today b { outline: 2px solid color-mix(in srgb, var(--c) 60%, transparent); outline-offset: 1.5px; }
     .day:active b { transform: scale(.85); }
-    .check { width: 52px; height: 52px; flex: none; border-radius: 16px; display: grid; place-items: center; border: 2px solid color-mix(in srgb, var(--c) 45%, var(--border)); color: color-mix(in srgb, var(--c) 70%, var(--muted)); transition: background .2s, color .2s, border-color .2s, transform .15s; }
+    .check { position: relative; width: 52px; height: 52px; flex: none; border-radius: 16px; display: grid; place-items: center; border: 2px solid color-mix(in srgb, var(--c) 45%, var(--border)); color: color-mix(in srgb, var(--c) 70%, var(--muted)); transition: background .2s, color .2s, border-color .2s, transform .15s; }
     .check:active { transform: scale(.9); }
     .habit.done .check { background: var(--c); border-color: var(--c); color: #fff; }
     .habit.rest .check { border-style: dashed; opacity: .6; }
     .habit.done .check.pop { animation: pop .45s cubic-bezier(.2,1.6,.4,1); }
     @keyframes pop { 0% { transform: scale(.7); } 100% { transform: scale(1); } }
+    .habit.done .check.pop::after { content: ''; position: absolute; inset: -3px; border-radius: 19px; border: 2px solid var(--c); animation: burst .6s ease-out forwards; pointer-events: none; }
+    @keyframes burst { from { transform: scale(.85); opacity: 1; } to { transform: scale(1.55); opacity: 0; } }
 
     /* Details */
-    .details { border-top: 1px solid var(--border); padding: 16px; animation: fade .25s ease-out; }
+    .dwrap { display: grid; grid-template-rows: 1fr; }
+    .dwrap > .details { min-height: 0; overflow: hidden; }
+    .dwrap.anim { animation: rowsIn .34s cubic-bezier(.2,.8,.2,1); }
+    .dwrap.closing { animation: rowsOut .24s ease-in forwards; }
+    @keyframes rowsIn { from { grid-template-rows: 0fr; opacity: 0; } }
+    @keyframes rowsOut { to { grid-template-rows: 0fr; opacity: 0; } }
+    .details { border-top: 1px solid var(--border); padding: 16px; }
+    .dwrap.anim .details > * { animation: rise .4s cubic-bezier(.2,.8,.2,1) both; }
+    .dwrap.anim .details > *:nth-child(2) { animation-delay: 40ms; } .dwrap.anim .details > *:nth-child(3) { animation-delay: 80ms; }
+    .dwrap.anim .details > *:nth-child(4) { animation-delay: 110ms; } .dwrap.anim .details > *:nth-child(n+5) { animation-delay: 140ms; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
     @keyframes fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
     .stat { background: var(--surface-2); border-radius: 12px; padding: 10px 8px; text-align: center; }
@@ -162,21 +177,37 @@
     .badge.got { color: var(--text); }
     .badge.got div { filter: none; opacity: 1; background: color-mix(in srgb, var(--c) 22%, var(--surface-2)); box-shadow: inset 0 0 0 2px var(--c); }
     .next-badge { font-size: .75rem; color: var(--muted); margin: 4px 2px 14px; }
-    .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-weight: 700; font-size: .92rem; }
-    .cal-head button { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; color: var(--muted); }
-    .cal-head button:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
-    .cal-head button:disabled { opacity: .3; cursor: default; }
-    .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-    .cal .dn { font-size: .68rem; color: var(--muted); font-weight: 600; padding-bottom: 4px; }
-    .cal button { aspect-ratio: 1; border-radius: 10px; font-size: .82rem; font-weight: 500; background: var(--surface-2); }
-    .cal button.off { background: transparent; box-shadow: inset 0 0 0 1.5px var(--border); color: var(--muted); }
-    .cal button.on { background: var(--c); color: #fff; font-weight: 700; box-shadow: none; }
-    .cal button.today { outline: 2px solid var(--c); outline-offset: -2px; }
-    .cal button.on.today { outline-color: rgba(255,255,255,.6); }
-    .cal button:disabled { background: transparent; box-shadow: none; color: var(--muted); opacity: .4; cursor: default; }
+    /* Takvim: yapılan günler habit renginde daireler, art arda günler bir zincirle birleşir */
+    .cal-head { display: flex; align-items: center; gap: 6px; margin: 4px 2px 10px; }
+    .cal-head .mt { flex: 1; font-weight: 800; font-size: 1.05rem; letter-spacing: -.01em; }
+    .cal-head .mt small { font-weight: 600; color: var(--muted); font-size: .85rem; margin-left: 4px; }
+    .cal-head .mc { font-size: .75rem; font-weight: 700; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); padding: 4px 9px; border-radius: 99px; }
+    .cal-head button { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--text); border: 1px solid var(--border); transition: background .15s, transform .15s; }
+    .cal-head button:active:not(:disabled) { transform: scale(.9); }
+    .cal-head button:disabled { opacity: .25; cursor: default; }
+    .cal { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 6px; text-align: center; touch-action: pan-y; }
+    .cal.slide-l { animation: calL .32s cubic-bezier(.2,.8,.2,1); }
+    .cal.slide-r { animation: calR .32s cubic-bezier(.2,.8,.2,1); }
+    @keyframes calL { from { opacity: 0; transform: translateX(28px); } }
+    @keyframes calR { from { opacity: 0; transform: translateX(-28px); } }
+    .cal .dn { font-size: .64rem; color: var(--muted); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding-bottom: 2px; }
+    .cd { position: relative; display: grid; place-items: center; height: 38px; }
+    .cd.cl::before, .cd.cr::after { content: ''; position: absolute; top: 5px; bottom: 5px; background: color-mix(in srgb, var(--c) 28%, transparent); }
+    .cd.cl::before { left: 0; right: 50%; }
+    .cd.cr::after { left: 50%; right: 0; }
+    .cd button { position: relative; z-index: 1; width: 32px; height: 32px; border-radius: 50%; font-size: .84rem; font-weight: 600; color: var(--text); transition: transform .15s, background .2s; }
+    .cd button:active:not(:disabled) { transform: scale(.85); }
+    .cd button.off { color: var(--muted); opacity: .55; }
+    .cd button.miss { color: var(--text); }
+    .cd button.on { background: var(--c); color: #fff; font-weight: 800; box-shadow: 0 3px 10px color-mix(in srgb, var(--c) 40%, transparent); }
+    .cd button.skip { background: none; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 55%, transparent); color: var(--muted); }
+    .cd button.skip::after { content: ''; position: absolute; right: -3px; top: -3px; width: 13px; height: 13px; background: url(img/snowflake.webp) center / contain no-repeat; }
+    .cd button.today { box-shadow: inset 0 0 0 2px var(--text); }
+    .cd button.on.today { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--c); }
+    .cd button:disabled { color: var(--muted); opacity: .3; cursor: default; }
     .cal-legend { display: flex; gap: 12px; flex-wrap: wrap; margin: 10px 2px 4px; font-size: .72rem; color: var(--muted); }
     .cal-legend span { display: inline-flex; align-items: center; gap: 5px; }
-    .cal-legend i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+    .cal-legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
     .hint { font-size: .75rem; color: var(--muted); margin: 6px 2px 14px; line-height: 1.45; }
     .detail-actions { display: flex; gap: 8px; }
     .btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 14px; border-radius: 12px; background: var(--surface-2); font-weight: 600; font-size: .88rem; }
@@ -197,10 +228,7 @@
     .tab-add:active span { transform: scale(.92); }
     .tab svg { width: 26px; height: 26px; margin: 2px 0 2px; opacity: .55; }
     .tab.active svg { opacity: 1; }
-    dialog.sheet { margin: auto auto 0; width: 100%; max-width: 560px; border-radius: 24px 24px 0 0; padding: 10px 16px calc(18px + env(safe-area-inset-bottom)); animation: sheetUp .25s cubic-bezier(.2,.8,.2,1); }
-    @keyframes sheetUp { from { transform: translateY(40px); opacity: 0; } }
-    .sheet .grab { width: 38px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto 14px; }
-    .sheet h3 { margin: 0 4px 10px; font-size: 1rem; }
+    #addSheet h3 { margin: 0 4px 10px; font-size: 1rem; }
     .sheet-item { width: 100%; display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 16px; text-align: left; }
     .sheet-item:hover { background: var(--surface-2); }
     .sheet-item img { width: 46px; height: 46px; object-fit: contain; flex: none; }
@@ -247,7 +275,23 @@
     .tab { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 0 8px; font-size: .7rem; font-weight: 600; color: var(--muted); position: relative; }
     .tab img { width: 30px; height: 30px; object-fit: contain; filter: grayscale(.9) opacity(.5); transition: filter .2s, transform .2s; }
     .tab.active { color: var(--text); }
-    .tab.active img { filter: none; transform: scale(1.08); }
+    .tab.active img { filter: none; transform: scale(1.08); animation: tabPop .45s cubic-bezier(.2,.9,.25,1.4); }
+    @keyframes tabPop { 40% { transform: scale(1.3) translateY(-3px); } }
+    /* Her sekmenin kendi giriş animasyonu */
+    #view-bugun.enter .card { animation: rise .45s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 45ms); }
+    #view-aklimda.enter .stage { animation: stageIn .7s ease-out both; }
+    #view-aklimda.enter .capture, #view-aklimda.enter .note { animation: rise .45s .15s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes stageIn { from { opacity: 0; filter: brightness(2.2) blur(6px); transform: scale(1.04); } }
+    #view-hedefler.enter .hero img { animation: drop .7s cubic-bezier(.2,.9,.25,1.25) both; }
+    #view-hedefler.enter .goal { animation: rise .45s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 60ms + 80ms); }
+    #view-hedefler.enter .bar i { animation: barFill 1s .25s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes barFill { from { width: 0; } }
+    /* Tanıtım adımları yana kayar */
+    .ob.fwd .ob-art, .ob.fwd h2, .ob.fwd .lead, .ob.fwd .ob-body { animation: obF .45s cubic-bezier(.2,.8,.2,1) both; }
+    .ob.back .ob-art, .ob.back h2, .ob.back .lead, .ob.back .ob-body { animation: obB .45s cubic-bezier(.2,.8,.2,1) both; }
+    .ob h2 { animation-delay: 40ms !important; } .ob .lead { animation-delay: 80ms !important; } .ob .ob-body { animation-delay: 120ms !important; }
+    @keyframes obF { from { opacity: 0; transform: translateX(40px); } }
+    @keyframes obB { from { opacity: 0; transform: translateX(-40px); } }
     .tab .count { position: absolute; top: 3px; left: calc(50% + 8px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--danger); color: #fff; font-size: .62rem; font-weight: 700; display: grid; place-items: center; }
 
     /* Sayfa başlığı (Aklımda / Hedefler) */
@@ -337,8 +381,44 @@
     .ob-note { font-size: .8rem; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.45; }
 
     /* Dialog */
-    dialog { margin: auto; border: 0; border-radius: 22px; background: var(--surface); color: var(--text); width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 22px; box-shadow: 0 30px 80px rgba(0,0,0,.35); }
-    dialog::backdrop { background: rgba(8,10,16,.55); backdrop-filter: blur(3px); }
+    dialog { margin: auto; border: 0; border-radius: 26px; background: var(--surface); color: var(--text); width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 22px; box-shadow: 0 30px 80px rgba(0,0,0,.35); --in: popIn; --out: popOut; }
+    dialog::backdrop { background: rgba(6,8,12,.5); backdrop-filter: blur(4px); }
+    dialog[open] { animation: var(--in) .36s cubic-bezier(.2,.9,.25,1.05) both; }
+    dialog.closing { animation: var(--out) .22s ease-in both; }
+    dialog[open]::backdrop { animation: bdIn .3s both; }
+    dialog.closing::backdrop { animation: bdOut .22s both; }
+    @keyframes bdIn { from { opacity: 0; } }
+    @keyframes bdOut { to { opacity: 0; } }
+    @keyframes popIn { from { opacity: 0; transform: scale(.9) translateY(8px); } }
+    @keyframes popOut { to { opacity: 0; transform: scale(.94); } }
+    /* Alt sayfa (sheet): aşağıdan yaylanarak gelir */
+    dialog.sheet-dlg { margin: auto auto 0; width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; border-radius: 28px 28px 0 0; padding: 12px 18px calc(20px + env(safe-area-inset-bottom)); --in: sheetIn; --out: sheetOut; }
+    dialog.sheet-dlg::before { content: ''; display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto 14px; }
+    @keyframes sheetIn { from { transform: translateY(100%); } 70% { transform: translateY(-1.5%); } }
+    @keyframes sheetOut { to { transform: translateY(100%); } }
+    /* Ayarlar: sağdan panel */
+    #settingsDialog { margin: 0 0 0 auto; height: 100%; max-height: 100%; width: min(420px, 100%); border-radius: 28px 0 0 28px; overflow-y: auto; padding-top: max(22px, env(safe-area-inset-top)); --in: panelIn; --out: panelOut; }
+    @keyframes panelIn { from { transform: translateX(100%); } }
+    @keyframes panelOut { to { transform: translateX(100%); } }
+    /* + menüsü: öğeler sırayla */
+    #addSheet[open] .sheet-item { animation: itemIn .42s cubic-bezier(.2,.9,.25,1.1) both; }
+    #addSheet[open] .sheet-item:nth-of-type(2) { animation-delay: 60ms; }
+    #addSheet[open] .sheet-item:nth-of-type(3) { animation-delay: 120ms; }
+    @keyframes itemIn { from { opacity: 0; transform: translateY(18px) scale(.96); } }
+    #addSheet[open] .sheet-item img { animation: iconSpin .6s cubic-bezier(.2,.9,.25,1.2) both; animation-delay: inherit; }
+    @keyframes iconSpin { from { transform: rotate(-25deg) scale(.5); } }
+    /* Hedef diyaloğu: hedef simgesi düşerek gelir */
+    .dlg-art { width: 58px; height: 58px; object-fit: contain; display: block; margin: -4px 0 6px; }
+    #goalDialog[open] .dlg-art { animation: drop .7s cubic-bezier(.2,.9,.25,1.25) both; }
+    @keyframes drop { from { transform: translateY(-40px) rotate(-60deg) scale(.6); opacity: 0; } }
+    /* Alışkanlık diyaloğu: canlı önizleme kartı seçilen renge bürünür */
+    .hpreview { --c: var(--brand); display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; margin-bottom: 18px; background: linear-gradient(120deg, color-mix(in srgb, var(--c) 22%, var(--surface-2)), var(--surface-2) 70%); transition: background .35s; }
+    .hpreview .emoji { transition: background .35s; }
+    .hpreview b { font-size: 1rem; }
+    .hpreview span { display: block; font-size: .75rem; color: var(--muted); }
+    #habitDialog .btn.primary { background: var(--c, var(--brand)); transition: background .3s; }
+    #habitDialog[open] .hpreview { animation: rise .45s .08s cubic-bezier(.2,.9,.25,1.1) both; }
+    #loginDialog { --in: popIn; }
     dialog h3 { font-size: 1.15rem; margin-bottom: 16px; }
     .field { margin-bottom: 18px; }
     .field > label, .field-label { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); margin-bottom: 7px; }
@@ -399,8 +479,8 @@
     </header>
 
     <main id="view-bugun">
-      <section class="card summary" id="summary"></section>
-      <section class="card overview" id="overview"></section>
+      <section class="card summary" id="summary" style="--i:0"></section>
+      <section class="card overview" id="overview" style="--i:1"></section>
       <div class="section-title" id="listTitle"></div>
       <ul class="habits" id="habits"></ul>
     </main>
@@ -449,8 +529,7 @@
   </nav>
 
   <!-- Ortadaki + menüsü -->
-  <dialog id="addSheet" class="sheet">
-    <div class="grab"></div>
+  <dialog id="addSheet" class="sheet-dlg">
     <h3>Ne eklemek istersin?</h3>
     <button class="sheet-item" data-action="add-habit"><img src="img/flame.webp" alt=""><div><b>Alışkanlık</b><span>Her gün ya da belli günlerde yapacağın bir şey</span></div></button>
     <button class="sheet-item" data-action="add-note"><img src="img/brain.webp" alt=""><div><b>Aklıma not</b><span>Unutmak istemediğin bir iş, istersen saatli</span></div></button>
@@ -458,8 +537,9 @@
   </dialog>
 
   <!-- Hedef ekle / düzenle -->
-  <dialog id="goalDialog">
+  <dialog id="goalDialog" class="sheet-dlg">
     <form method="dialog" id="goalForm">
+      <img class="dlg-art" src="img/target.webp" alt="">
       <h3 id="goalDialogTitle">Yeni hedef</h3>
       <div class="field">
         <label for="goalTitle">Hedef</label>
@@ -487,9 +567,10 @@
   </dialog>
 
   <!-- Ekle / düzenle -->
-  <dialog id="habitDialog">
+  <dialog id="habitDialog" class="sheet-dlg">
     <form method="dialog" id="habitForm">
       <h3 id="habitDialogTitle">Yeni alışkanlık</h3>
+      <div class="hpreview" id="hpreview"><div class="emoji"></div><div><b></b><span></span></div></div>
       <div class="field">
         <label for="habitName">İsim</label>
         <input type="text" id="habitName" maxlength="60" placeholder="ör. 20 dk kitap oku" autocomplete="off" required>
@@ -595,6 +676,7 @@
     const iconText = (e) => (iconName(e) ? IMAGE_ICONS[iconName(e)] : e);
     const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
     const DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];   // getDay() sırası
+    const DAYS2 = ['Pz', 'Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct'];         // iki harfli kısaltma
     const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];                          // ekranda Pazartesi başlar
     const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
     const MILESTONES = [[3, 'img:sprout'], [7, '⭐'], [14, '💫'], [30, '🏅'], [60, '🥈'], [100, '🥇'], [200, '💎'], [365, '👑']];
@@ -607,6 +689,7 @@
     let habits = [], notes = [], goals = [], settings = {};
     const TABS = ['bugun', 'aklimda', 'hedefler'];
     let tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'bugun';
+    let justOpened = null, calSlide = null, overviewAnim = null;
     let noteWhen = 'none', openNoteId = null, editingGoalId = null, ob = null, freshLoad = false;
     let mode = location.protocol === 'file:' ? 'local' : 'unknown'; // 'cloud' | 'local' | 'unknown'
     let openId = null;
@@ -630,6 +713,29 @@
     function toast(msg) {
       const t = $('#toast'); t.textContent = msg; t.classList.add('show');
       clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2600);
+    }
+
+    // Diyaloglar kapanırken de animasyon oynasın: close() önce .closing sınıfı ekler, animasyon bitince kapatır
+    {
+      const nativeClose = HTMLDialogElement.prototype.close;
+      HTMLDialogElement.prototype.close = function (...args) {
+        if (!this.open || this.classList.contains('closing') || matchMedia('(prefers-reduced-motion: reduce)').matches) return nativeClose.apply(this, args);
+        this.classList.add('closing');
+        setTimeout(() => { this.classList.remove('closing'); nativeClose.apply(this, args); }, 210);
+      };
+      document.addEventListener('cancel', (e) => {
+        const d = e.target;
+        if (d.tagName !== 'DIALOG' || d.id === 'loginDialog') return;
+        e.preventDefault();
+        d.close();
+      }, true);
+      // Arka plana dokununca alt sayfalar kapansın
+      document.addEventListener('click', (e) => {
+        if (e.target.tagName === 'DIALOG' && e.target.id !== 'loginDialog') {
+          const r = e.target.getBoundingClientRect();
+          if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) e.target.close();
+        }
+      });
     }
 
     // ---------- Seri hesapları (tek doğru kaynak: history + skips + days) ----------
@@ -993,7 +1099,7 @@
         let week = '';
         for (let i = 6; i >= 0; i--) {
           const d = addDays(today, -i), st = dayState(h, s.sets, d);
-          week += `<button class="day ${st}${i === 0 ? ' today' : ''}" data-action="toggle" data-date="${keyOf(d)}" aria-label="${d.getDate()} ${MONTHS[d.getMonth()]}">${DAYS[d.getDay()].slice(0, 2)}<b></b></button>`;
+          week += `<button class="day ${st}${i === 0 ? ' today' : ''}" data-action="toggle" data-date="${keyOf(d)}" aria-label="${d.getDate()} ${MONTHS[d.getMonth()]}">${DAYS2[d.getDay()]}<b></b></button>`;
         }
         const tier = flameTier(s.current);
         const streak = s.current ? `<span class="streak-pill t${tier}"><img class="flame" src="img/flame.webp" alt=""><span class="streak-num">${s.current} gün</span></span>` : `<span class="streak-pill zero">Seri yok</span>`;
@@ -1006,7 +1112,7 @@
         else if (s.best > s.current) extra = `<span>· en iyi ${s.best}</span>`;
         const open = openId === h.id;
         return `
-          <li class="card habit t${tier}${s.doneToday ? ' done' : ''}${!s.dueToday && !s.doneToday ? ' rest' : ''}" style="--c:${h.color}" data-id="${h.id}">
+          <li style="--i:${idx + 2};--c:${h.color}" class="card habit t${tier}${s.doneToday ? ' done' : ''}${!s.dueToday && !s.doneToday ? ' rest' : ''}" data-id="${h.id}">
             <div class="habit-main" data-action="expand">
               <div class="emoji">${iconHTML(h.emoji)}</div>
               <div class="info">
@@ -1021,6 +1127,8 @@
           </li>`;
       }).join('');
       popId = null;
+      justOpened = null;
+      calSlide = null;
     }
 
     function renderOverview(all) {
@@ -1059,7 +1167,7 @@
       const weekPct = weekDue ? Math.round((weekHit / weekDue) * 100) : 0;
       el.innerHTML = `
         <div class="ov-head"><h3>Son bir yıl</h3><button data-action="toggle-overview">${collapsed ? 'Göster' : 'Gizle'}</button></div>
-        <div class="ov-body">
+        <div class="ov-body${overviewAnim ? ' ' + overviewAnim : ''}"><div class="ov-inner">
           <div class="ov-nums">
             <div><b>%${weekPct}</b><span>Bu hafta</span></div>
             <div><b>${active}</b><span>Aktif gün</span></div>
@@ -1070,7 +1178,8 @@
             <div class="heat-scroll" id="heatScroll"><div class="heat-grid">${cells}</div></div>
           </div>
           <div class="legend">Az <i style="background:var(--surface-2)"></i><i style="background:color-mix(in srgb,var(--brand) 30%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--brand) 55%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--brand) 80%,var(--surface-2))"></i><i style="background:var(--brand)"></i> Çok</div>
-        </div>`;
+        </div></div>`;
+      overviewAnim = null;
       const sc = $('#heatScroll'); if (sc) sc.scrollLeft = sc.scrollWidth; // en yeni haftalar görünsün
     }
 
@@ -1079,18 +1188,25 @@
       const v = calView[h.id] || (calView[h.id] = { y: today.getFullYear(), m: today.getMonth() });
       const lead = (new Date(v.y, v.m, 1).getDay() + 6) % 7; // Pazartesi başlangıç
       const days = new Date(v.y, v.m + 1, 0).getDate();
-      let cal = WEEK_ORDER.map((d) => `<div class="dn">${DAYS[d]}</div>`).join('') + '<div></div>'.repeat(lead);
+      let cal = WEEK_ORDER.map((d) => `<div class="dn">${DAYS2[d]}</div>`).join('') + '<div></div>'.repeat(lead);
+      let monthDone = 0;
       for (let d = 1; d <= days; d++) {
         const date = new Date(v.y, v.m, d), k = keyOf(date);
-        const st = dayState(h, s.sets, date);
-        cal += `<button class="${st}${k === tk ? ' today' : ''}" data-action="cycle" data-date="${k}"${k > tk ? ' disabled' : ''}>${d}</button>`;
+        const st = k > tk ? 'future' : dayState(h, s.sets, date);
+        if (st === 'on') monthDone++;
+        // Art arda yapılan günler (aynı hafta satırında) bir bantla birleşir
+        const col = (lead + d - 1) % 7;
+        const onAt = (n) => n >= 1 && n <= days && keyOf(new Date(v.y, v.m, n)) <= tk && s.sets.done.has(keyOf(new Date(v.y, v.m, n)));
+        const chain = st === 'on' ? `${col > 0 && onAt(d - 1) ? ' cl' : ''}${col < 6 && onAt(d + 1) ? ' cr' : ''}` : '';
+        cal += `<div class="cd${chain}"><button class="${st}${k === tk ? ' today' : ''}" data-action="cycle" data-date="${k}"${k > tk ? ' disabled' : ''}>${d}</button></div>`;
       }
       const isCurrentMonth = v.y === today.getFullYear() && v.m === today.getMonth();
       const badges = MILESTONES.map(([n, e]) => `<div class="badge${s.best >= n ? ' got' : ''}"><div>${iconHTML(e)}</div>${n} gün</div>`).join('');
       const next = MILESTONES.find(([n]) => n > s.current);
       const plan = h.days.length === 7 ? 'Her gün' : WEEK_ORDER.filter((d) => h.days.includes(d)).map((d) => DAYS[d]).join(', ');
+      const anim = justOpened === h.id;
       return `
-        <div class="details">
+        <div class="dwrap${anim ? ' anim' : ''}"><div class="details">
           <div class="stats">
             <div class="stat"><b>${s.current}</b><span>Mevcut seri</span></div>
             <div class="stat"><b>${s.best}</b><span>En iyi seri</span></div>
@@ -1100,11 +1216,12 @@
           <div class="badges">${badges}</div>
           <p class="next-badge">${next ? `Sonraki rozet ${iconText(next[1])} ${next[0]} gün — ${next[0] - s.current} gün kaldı` : 'Tüm rozetleri topladın! 👑'} · Plan: ${plan}</p>
           <div class="cal-head">
+            <div class="mt">${MONTHS[v.m]}<small>${v.y}</small></div>
+            <span class="mc">${monthDone} gün</span>
             <button data-action="month" data-dir="-1" aria-label="Önceki ay">${ICON_LEFT}</button>
-            <span>${MONTHS[v.m]} ${v.y}</span>
             <button data-action="month" data-dir="1" aria-label="Sonraki ay"${isCurrentMonth ? ' disabled' : ''}>${ICON_RIGHT}</button>
           </div>
-          <div class="cal">${cal}</div>
+          <div class="cal${calSlide && calSlide.id === h.id ? ' slide-' + calSlide.dir : ''}" data-swipe="${h.id}">${cal}</div>
           <div class="cal-legend">
             <span><i style="background:var(--c)"></i>Yapıldı</span>
             <span><i style="background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 35%,transparent) 0 3px,transparent 3px 6px)"></i><img src="img/snowflake.webp" alt="" style="width:14px;height:14px"> İzinli (seri bozulmaz)</span>
@@ -1117,7 +1234,7 @@
             <button class="btn" data-action="edit">Düzenle</button>
             <button class="btn danger" data-action="delete">Sil</button>
           </div>
-        </div>`;
+        </div></div>`;
     }
 
 
@@ -1128,6 +1245,9 @@
       history.replaceState(null, '', '#' + t);
       renderTabs();
       if (t === 'aklimda') ensureBrain();
+      const view = $('#view-' + t);
+      view.classList.remove('enter'); void view.offsetWidth; view.classList.add('enter');
+      clearTimeout(setTab.timer); setTab.timer = setTimeout(() => view.classList.remove('enter'), 1300);
       if (brain3d) brain3d.setVisible(t === 'aklimda');
       window.scrollTo(0, 0);
     }
@@ -1235,7 +1355,6 @@
       commit();
     }
     $('#captureForm').addEventListener('submit', addNote);
-    $('#addSheet').addEventListener('click', (e) => { if (e.target.id === 'addSheet') e.target.close(); });
     $('#whenChips').addEventListener('click', (e) => {
       const b = e.target.closest('[data-when]'); if (!b) return;
       noteWhen = b.dataset.when;
@@ -1290,7 +1409,7 @@
         const icon = h ? iconHTML(h.emoji) : '<img class="ico" src="img/target.webp" alt="">';
         const sub = h ? `${esc(h.name)} alışkanlığından sayılıyor` : 'Elle takip';
         const deadline = g.deadline ? ` · ${parseKey(g.deadline).getDate()} ${MONTHS[parseKey(g.deadline).getMonth()]} ${parseKey(g.deadline).getFullYear()}` : '';
-        return `<li class="card goal${g.doneAt ? ' done' : ''}" data-gid="${g.id}" style="--c:${h ? h.color : 'var(--brand)'}">
+        return `<li class="card goal${g.doneAt ? ' done' : ''}" data-gid="${g.id}" style="--c:${h ? h.color : 'var(--brand)'};--i:${goals.indexOf(g)}">
             <div class="goal-top" data-action="goal-edit">
               <div class="emoji">${icon}</div>
               <div style="flex:1;min-width:0"><h3>${esc(g.title)}</h3><div class="sub">${sub}${deadline}</div></div>
@@ -1350,7 +1469,7 @@
       showOnboarding();
     }
     function showOnboarding() {
-      ob = { step: 0, picks: {}, goal: { title: '', target: '', unit: '', deadline: '', link: '' }, notify: '' };
+      ob = { step: 0, dir: 'fwd', picks: {}, goal: { title: '', target: '', unit: '', deadline: '', link: '' }, notify: '' };
       $('#onboard').hidden = false;
       renderOnboarding();
     }
@@ -1397,7 +1516,8 @@
           <p class="ob-note">${ob.notify || (ios ? 'iPhone\'da bildirimler için önce Safari\'de Paylaş → "Ana Ekrana Ekle", sonra uygulamayı oradan aç.' : 'Günlük alışkanlık hatırlatması, notlarının zamanı ve pazar akşamı haftalık özet için.')}</p>`;
         actions = '<button class="btn primary" data-action="ob-finish">Bitir</button>';
       }
-      $('#onboard').innerHTML = `<div class="ob">${top}<img class="ob-art" src="img/${art}.webp" alt=""><h2>${title}</h2><p class="lead">${lead}</p><div class="ob-body">${body}</div><div class="ob-actions">${actions}</div></div>`;
+      $('#onboard').innerHTML = `<div class="ob ${ob.dir || ''}">${top}<img class="ob-art" src="img/${art}.webp" alt=""><h2>${title}</h2><p class="lead">${lead}</p><div class="ob-body">${body}</div><div class="ob-actions">${actions}</div></div>`;
+      ob.dir = null;
     }
     function finishOnboarding() {
       saveObInputs();
@@ -1419,6 +1539,29 @@
       $('#onboard').hidden = true;
       setTab('bugun');
       commit();
+    }
+
+    function changeMonth(id, dir) {
+      const v = calView[id], today = new Date();
+      const d = new Date(v.y, v.m + dir, 1);
+      if (d > today) return;
+      calView[id] = { y: d.getFullYear(), m: d.getMonth() };
+      calSlide = { id, dir: dir > 0 ? 'l' : 'r' };
+      render();
+    }
+    // Takvimde sağa/sola kaydırarak ay değiştir
+    {
+      let sx = 0, sy = 0, sid = null;
+      document.addEventListener('touchstart', (e) => {
+        const c = e.target.closest('[data-swipe]'); sid = c ? Number(c.dataset.swipe) : null;
+        if (sid) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }
+      }, { passive: true });
+      document.addEventListener('touchend', (e) => {
+        if (!sid) return;
+        const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) changeMonth(sid, dx < 0 ? 1 : -1);
+        sid = null;
+      }, { passive: true });
     }
 
     // ---------- Konfeti ----------
@@ -1450,7 +1593,7 @@
     function openHabitDialog(id) {
       editingId = id || null;
       const h = id ? find(id) : null;
-      draft = { emoji: h ? h.emoji : EMOJIS[0], color: h ? h.color : COLORS[habits.length % COLORS.length], days: h ? h.days.slice() : ALL_DAYS.slice() };
+      draft = { emoji: h ? h.emoji : EMOJIS[0], color: h ? h.color : (COLORS.find((c) => !habits.some((x) => x.color === c)) || COLORS[habits.length % COLORS.length]), days: h ? h.days.slice() : ALL_DAYS.slice() };
       $('#habitDialogTitle').textContent = h ? 'Alışkanlığı düzenle' : 'Yeni alışkanlık';
       $('#habitName').value = h ? h.name : '';
       $('#habitTarget').value = h ? h.target : 1;
@@ -1460,7 +1603,20 @@
       $('#habitDialog').showModal();
       setTimeout(() => $('#habitName').focus(), 50);
     }
+    function paintPreview() {
+      const pv = $('#hpreview');
+      $('#habitDialog').style.setProperty('--c', draft.color);
+      pv.style.setProperty('--c', draft.color);
+      pv.querySelector('.emoji').innerHTML = iconHTML(draft.emoji);
+      pv.querySelector('b').textContent = $('#habitName').value.trim() || 'Yeni alışkanlık';
+      const plan = draft.days.length === 7 ? 'Her gün' : WEEK_ORDER.filter((d) => draft.days.includes(d)).map((d) => DAYS[d]).join(', ');
+      const t = parseInt($('#habitTarget').value, 10) || 1;
+      pv.querySelector('span').textContent = plan + (t > 1 ? ` · günde ${t} kez` : '');
+    }
+    $('#habitName').addEventListener('input', () => draft && paintPreview());
+    $('#habitTarget').addEventListener('input', () => draft && paintPreview());
     function paintPickers() {
+      paintPreview();
       const emojis = EMOJIS.includes(draft.emoji) ? EMOJIS : [draft.emoji, ...EMOJIS.slice(0, -1)];
       $('#emojiPicker').innerHTML = emojis.map((e) => `<button type="button" data-emoji="${esc(e)}" class="${e === draft.emoji ? 'sel' : ''}">${iconHTML(e)}</button>`).join('');
       $('#colorPicker').innerHTML = COLORS.map((c) => `<button type="button" data-color="${c}" style="background:${c}" class="${c === draft.color ? 'sel' : ''}" aria-label="${c}"></button>`).join('');
@@ -1575,7 +1731,7 @@
       $('#modeInfo').textContent = mode === 'cloud'
         ? 'Verilerin buluta kaydediliyor; tüm cihazlarında aynı.'
         : 'Bulut bağlantısı yok; veriler sadece bu tarayıcıda. Yedek indirmeyi unutma.';
-      $('#modeInfo').textContent += ' · Sürüm 6';
+      $('#modeInfo').textContent += ' · Sürüm 7';
       paintRemind();
       $('#settingsDialog').showModal();
     }
@@ -1650,8 +1806,8 @@
         case 'goal-delete':
           if (confirm('Bu hedef silinsin mi?')) { goals = goals.filter((g) => g.id !== editingGoalId); $('#goalDialog').close(); commit(); }
           break;
-        case 'ob-next': saveObInputs(); ob.step++; renderOnboarding(); $('#onboard').scrollTo(0, 0); break;
-        case 'ob-back': saveObInputs(); ob.step = Math.max(0, ob.step - 1); renderOnboarding(); break;
+        case 'ob-next': saveObInputs(); ob.step++; ob.dir = 'fwd'; renderOnboarding(); $('#onboard').scrollTo(0, 0); break;
+        case 'ob-back': saveObInputs(); ob.step = Math.max(0, ob.step - 1); ob.dir = 'back'; renderOnboarding(); break;
         case 'ob-skip-goal': ob.goal = { title: '', target: '', unit: '', deadline: '', link: '' }; ob.step++; renderOnboarding(); break;
         case 'ob-pick': {
           saveObInputs();
@@ -1669,10 +1825,16 @@
         case 'check': checkToday(id); break;
         case 'minus': minusToday(id); break;
         case 'cycle': cycleDay(id, el.dataset.date); break;
-        case 'expand': openId = openId === id ? null : id; render(); break;
+        case 'expand': {
+          const wrap = li.querySelector('.dwrap');
+          if (openId === id && wrap) {
+            wrap.classList.add('closing');
+            setTimeout(() => { if (openId === id) { openId = null; render(); } }, 230);
+          } else { openId = id; justOpened = id; render(); }
+          break;
+        }
         case 'month': {
-          const v = calView[id]; const d = new Date(v.y, v.m + Number(el.dataset.dir), 1);
-          calView[id] = { y: d.getFullYear(), m: d.getMonth() }; render(); break;
+          changeMonth(id, Number(el.dataset.dir)); break;
         }
         case 'up': moveHabit(id, -1); break;
         case 'down': moveHabit(id, 1); break;
@@ -1680,7 +1842,14 @@
         case 'delete': deleteHabit(id); break;
         case 'add': if (tab === 'hedefler') openGoalDialog(); else openHabitDialog(); break;
         case 'settings': openSettings(); break;
-        case 'toggle-overview': store.set(K.overview, store.get(K.overview) === 'closed' ? 'open' : 'closed'); render(); break;
+        case 'toggle-overview': {
+          if (store.get(K.overview) === 'closed') { store.set(K.overview, 'open'); overviewAnim = 'anim'; renderToday(); }
+          else {
+            $('#overview .ov-body').classList.add('closing');
+            setTimeout(() => { store.set(K.overview, 'closed'); renderToday(); }, 230);
+          }
+          break;
+        }
         case 'close-dialog': el.closest('dialog').close(); break;
         case 'test-push': testPush(); break;
         case 'export': exportData(); break;
