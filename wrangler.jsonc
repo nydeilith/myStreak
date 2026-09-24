@@ -8,8 +8,8 @@
     // Cloudflare paneli -> Storage & Databases -> KV -> "mystreak" satırındaki ID
     { "binding": "DB", "id": "973741a29f85459bb59b141ac5202f7c" }
   ],
-  // Her 15 dakikada bir hatırlatma kontrolü
-  "triggers": { "crons": ["*/15 * * * *"] },
+  // Her 5 dakikada bir hatırlatma kontrolü (Aklımda notları dakika hassasiyeti ister)
+  "triggers": { "crons": ["*/5 * * * *"] },
   // Paneldeki değişkenler (APP_PASSWORD vb.) her deploy'da silinmesin
   "keep_vars": true,
   "observability": { "enabled": true }

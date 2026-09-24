@@ -6,7 +6,10 @@ Alışkanlık / seri (streak) takip uygulaması. Cloudflare Pages üzerinde çal
 - **Doğru seri mantığı:** Seri, işaretlediğin günlerden hesaplanır. Bir gün kaçırırsan sıfırlanır; bugün henüz yapmadıysan dünkü serin korunur ("bugün yap!" uyarısı çıkar).
 - **Haftanın günleri:** Her alışkanlık için hangi günler yapılacağını seç (ör. spor Pzt/Çar/Cum). Plan dışı günler seriyi bozmaz.
 - **İzin günü:** Hastalık, tatil gibi günleri takvimden "izinli" işaretle; serin bozulmaz.
-- **Günlük hatırlatma bildirimi:** Belirlediğin saatte, bitmemiş alışkanlıkların varsa telefona bildirim gelir.
+- **Aklımda:** Aklına geleni tek satırla bırak, istersen saat ver. Zamanı gelince bildirim gelir; Android'de bildirimden "Yaptım" ya da "1 saat ertele" denebilir. Aklındaki şey arttıkça beyin görseli doygunlaşır.
+- **Hedeflerim:** Uzun vadeli hedefler; elle (+/−) ya da bir alışkanlığa bağlı sayılır, bitiş tarihine göre "yolundasın / geridesin" hesabı.
+- **Tanıtım:** İlk açılışta hazır alışkanlık şablonları, "kaç gündür yapıyorsun?", ilk hedef ve bildirim izni.
+- **Bildirimler:** Günlük alışkanlık hatırlatması, Aklımda notları ve pazar 20:00 haftalık özet.
 - **Genel görünüm:** Son 18 haftanın ısı haritası, bu haftanın başarı oranı ve tamamlanan gün sayıları.
 - **Rozetler:** 3, 7, 14, 30, 60, 100, 200 ve 365 günlük seriler için rozet; tüm alışkanlıklar bitince konfeti 🎉.
 - **Diğer:** Takvimden geçmiş günleri düzeltme, emoji/renk seçimi, sıralama, açık/koyu tema, JSON yedek alma/yükleme, çevrimdışı çalışma, "Ana ekrana ekle" ile uygulama gibi kullanım.
@@ -27,7 +30,7 @@ wrangler.jsonc   -> Worker ayarları (KV, zamanlayıcı)
 3. **Şifre:** Worker → Settings → Variables and Secrets → `APP_PASSWORD` (Secret) ekle.
    Koymazsan linki bilen herkes verini değiştirebilir.
 
-Hatırlatma zamanlayıcısı (`*/15 * * * *`) ayar dosyasında tanımlı; ayrıca bir şey kurmaya gerek yok.
+Hatırlatma zamanlayıcısı (`*/5 * * * *`) ayar dosyasında tanımlı; ayrıca bir şey kurmaya gerek yok.
 Uygulamada ⚙️ **Ayarlar → Günlük hatırlatma**'yı aç ve "Test bildirimi gönder" ile dene.
 
 > 📱 **iPhone:** Bildirimler iOS 16.4+ sürümünde ve uygulama Safari'den **Paylaş → Ana Ekrana Ekle** ile eklenip oradan açıldığında çalışır.
