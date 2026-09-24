@@ -22,5 +22,58 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Aklıma not",
+      "short_name": "Not",
+      "description": "Aklımda'ya hızlı not",
+      "url": "/?a=note#aklimda",
+      "icons": [
+        {
+          "src": "img/brain.webp",
+          "sizes": "384x384",
+          "type": "image/webp"
+        }
+      ]
+    },
+    {
+      "name": "Sesli not",
+      "short_name": "Sesli not",
+      "description": "Konuşarak not bırak",
+      "url": "/?a=voice#aklimda",
+      "icons": [
+        {
+          "src": "img/brain.webp",
+          "sizes": "384x384",
+          "type": "image/webp"
+        }
+      ]
+    },
+    {
+      "name": "Odak başlat",
+      "short_name": "Odak",
+      "description": "Bir alışkanlık için odak sayacı",
+      "url": "/?a=focus#bugun",
+      "icons": [
+        {
+          "src": "img/flame.webp",
+          "sizes": "384x384",
+          "type": "image/webp"
+        }
+      ]
+    },
+    {
+      "name": "Yeni alışkanlık",
+      "short_name": "Alışkanlık",
+      "url": "/?a=habit#bugun",
+      "icons": [
+        {
+          "src": "img/sprout.webp",
+          "sizes": "256x256",
+          "type": "image/webp"
+        }
+      ]
+    }
   ]
 }

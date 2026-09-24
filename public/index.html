@@ -337,6 +337,10 @@
     .capture { padding: 10px 10px 12px 14px; margin-bottom: 22px; }
     .capture-row { display: flex; gap: 8px; align-items: center; }
     .capture input[type="text"] { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 1rem; padding: 10px 0; outline: none; }
+    .capture .mic { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); background: var(--surface-2); position: relative; transition: color .2s, background .2s; }
+    .capture .mic.on { color: #fff; background: var(--danger); }
+    .capture .mic.on::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--danger); animation: burst 1.1s ease-out infinite; }
+    .capture.listening input[type="text"]::placeholder { color: var(--danger); }
     .capture .send { flex: none; padding: 10px 16px; border-radius: 12px; background: var(--text); color: var(--bg); font-weight: 700; font-size: .88rem; }
     .chips { display: flex; gap: 6px; overflow-x: auto; padding-top: 6px; scrollbar-width: none; }
     .chips::-webkit-scrollbar { display: none; }
@@ -588,6 +592,7 @@
       <form class="card capture" id="captureForm" autocomplete="off">
         <div class="capture-row">
           <input type="text" id="captureText" maxlength="280" placeholder="Aklından ne geçiyor?" enterkeyhint="done">
+          <button type="button" class="mic" id="micBtn" data-action="voice" aria-label="Sesli not" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
           <button type="submit" class="send">Bırak</button>
         </div>
         <div class="chips" id="whenChips"></div>
@@ -626,6 +631,12 @@
     <button class="sheet-item" data-action="add-habit"><img src="img/flame.webp" alt=""><div><b>Alışkanlık</b><span>Her gün ya da belli günlerde yapacağın bir şey</span></div></button>
     <button class="sheet-item" data-action="add-note"><img src="img/brain.webp" alt=""><div><b>Aklıma not</b><span>Unutmak istemediğin bir iş, istersen saatli</span></div></button>
     <button class="sheet-item" data-action="add-goal"><img src="img/target.webp" alt=""><div><b>Hedef</b><span>Ulaşmak istediğin bir sonuç</span></div></button>
+  </dialog>
+
+  <!-- Kısayoldan odak: hangi alışkanlık? -->
+  <dialog id="focusPick" class="sheet-dlg">
+    <h3>Hangi alışkanlık için odak?</h3>
+    <div id="focusPickList"></div>
   </dialog>
 
   <!-- Odak süresi -->
@@ -2074,6 +2085,52 @@
       });
     }
 
+    // ---------- Sesli not (Web Speech API) ----------
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let rec = null;
+    if (SR) $('#micBtn').hidden = false;
+    function toggleVoice() {
+      if (!SR) return toast('Bu tarayıcı sesli yazmayı desteklemiyor');
+      if (rec) { rec.stop(); return; }
+      const input = $('#captureText'), before = input.value.trim();
+      rec = new SR();
+      rec.lang = 'tr-TR'; rec.interimResults = true; rec.continuous = false;
+      rec.onresult = (e) => {
+        const text = Array.from(e.results).map((r) => r[0].transcript).join(' ').trim();
+        input.value = (before ? before + ' ' : '') + text;
+      };
+      const stop = () => { rec = null; $('#micBtn').classList.remove('on'); $('#captureForm').classList.remove('listening'); input.placeholder = 'Aklından ne geçiyor?'; };
+      rec.onend = () => { stop(); if (input.value.trim()) input.focus(); };
+      rec.onerror = (e) => { stop(); if (e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('Mikrofon izni verilmedi'); else if (e.error !== 'aborted' && e.error !== 'no-speech') toast('Ses anlaşılamadı, tekrar dene'); };
+      $('#micBtn').classList.add('on'); $('#captureForm').classList.add('listening');
+      input.placeholder = 'Dinliyorum…';
+      if (navigator.vibrate) navigator.vibrate(10);
+      try { rec.start(); } catch (e) { stop(); }
+    }
+
+    // ---------- Ana ekran kısayolları (?a=note|voice|focus|habit) ----------
+    function openFocusPick() {
+      const tk = todayKey();
+      const list = habits.filter((h) => !h.history.includes(tk));
+      if (!list.length) return toast('Bugün hepsini bitirdin');
+      if (list.length === 1) return startTimer(list[0].id);
+      $('#focusPickList').innerHTML = list.map((h) => `<button class="sheet-item" data-pick="${h.id}"><div class="emoji" style="--c:${h.color};background:color-mix(in srgb, ${h.color} 16%, transparent)">${iconHTML(h.emoji)}</div><div><b>${esc(h.name)}</b><span>${h.minutes ? h.minutes + ' dakika' : 'Süre seçeceksin'}</span></div></button>`).join('');
+      $('#focusPick').showModal();
+    }
+    $('#focusPick').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-pick]'); if (!b) return;
+      $('#focusPick').close();
+      setTimeout(() => startTimer(Number(b.dataset.pick)), 220);
+    });
+    function handleShortcut() {
+      const a = new URLSearchParams(location.search).get('a');
+      if (!a) return;
+      history.replaceState(null, '', location.pathname + location.hash);
+      if (a === 'note' || a === 'voice') { setTab('aklimda'); setTimeout(() => { $('#captureText').focus(); if (a === 'voice') toggleVoice(); }, 300); }
+      else if (a === 'focus') { setTab('bugun'); openFocusPick(); }
+      else if (a === 'habit') { setTab('bugun'); openHabitDialog(); }
+    }
+
     // ---------- Odak süresi seçimi ----------
     function openFocusSheet(id) {
       focusFor = id;
@@ -2347,7 +2404,7 @@
       $('#modeInfo').textContent = mode === 'cloud'
         ? 'Verilerin buluta kaydediliyor; tüm cihazlarında aynı.'
         : 'Bulut bağlantısı yok; veriler sadece bu tarayıcıda. Yedek indirmeyi unutma.';
-      $('#modeInfo').textContent += ' · Sürüm 9';
+      $('#modeInfo').textContent += ' · Sürüm 10';
       paintRemind();
       $('#freezeOn').checked = settings.freezeOn !== false;
       $('#settingsDialog').showModal();
@@ -2420,6 +2477,7 @@
         case 'month-share': shareMonthCard(); break;
         case 'timer': startTimer(id); break;
         case 'focus': openFocusSheet(id); break;
+        case 'voice': toggleVoice(); break;
         case 'timer-pause': pauseTimer(); break;
         case 'timer-finish': finishTimer(false); break;
         case 'timer-cancel': if (confirm('Sayaç durdurulsun mu? Alışkanlık işaretlenmeyecek.')) closeTimer(); break;
@@ -2521,7 +2579,7 @@
     });
 
     if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('/sw.js').catch(console.error);
-    load().then(() => { if (timerState()) showTimer(); });
+    load().then(() => { if (timerState()) showTimer(); handleShortcut(); });
     if (tab === 'aklimda') ensureBrain();
   </script>
 </body>
