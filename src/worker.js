@@ -51,10 +51,25 @@ async function pushApi(request, env) {
     return json({ ok: true });
   }
   if (action === 'test') {
-    const status = await sendPush(env.DB, subscription, { title: 'myStreak 🔥', body: 'Bildirimler çalışıyor! Hatırlatmalar bu şekilde gelecek.' }, origin);
+    const status = await sendPush(env.DB, subscription, { title: 'myStreak', body: 'Bildirimler çalışıyor. Hatırlatmalar bu şekilde gelecek.' }, origin);
     return json({ ok: status >= 200 && status < 300, status });
   }
   throw new HttpError(400, 'unknown action');
+}
+
+// Bildirimdeki "Yaptım" / "1 saat ertele" butonları (service worker çağırır)
+async function noteActionApi(request, env) {
+  if (request.method !== 'POST') throw new HttpError(405, 'method not allowed');
+  const { id, action } = await readJson(request, 1024);
+  const data = await readData(env);
+  const note = (data.notes || []).find((n) => n.id === id);
+  if (!note) throw new HttpError(404, 'note not found');
+  if (action === 'done') note.doneAt = Date.now();
+  else if (action === 'snooze') note.remindAt = Date.now() + 3600e3;
+  else throw new HttpError(400, 'unknown action');
+  data.updatedAt = Date.now();
+  await writeData(env, data);
+  return json({ ok: true });
 }
 
 async function handleApi(request, env) {
@@ -69,6 +84,7 @@ async function handleApi(request, env) {
   try {
     if (pathname === '/api/habits') return await habitsApi(request, env);
     if (pathname === '/api/push') return await pushApi(request, env);
+    if (pathname === '/api/notes/action') return await noteActionApi(request, env);
     return json({ error: 'not found' }, 404);
   } catch (e) {
     console.error(e);
