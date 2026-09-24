@@ -14,55 +14,28 @@ Alışkanlık / seri (streak) takip uygulaması. Cloudflare Pages üzerinde çal
 ## Dosyalar
 ```
 public/          -> site (index.html, service worker, ikonlar)
-functions/api/   -> sunucu tarafı: /api/habits, /api/push, /api/cron
-lib/             -> ortak kod (depolama, web push şifreleme)
-cron-worker.js   -> hatırlatmaları tetikleyen küçük zamanlayıcı Worker
+src/worker.js    -> Worker: /api/habits, /api/push ve zamanlanmış hatırlatmalar
+lib/             -> ortak kod (depolama, web push şifreleme, hatırlatmalar)
+wrangler.jsonc   -> Worker ayarları (KV, zamanlayıcı)
 ```
 
-## Kurulum (Cloudflare)
+## Kurulum (Cloudflare Workers)
+1. **KV oluştur:** Storage & Databases → KV → Create → adı `mystreak`. Listede görünen **ID**'yi
+   `wrangler.jsonc` içindeki `"id"` alanına yaz.
+2. **Worker'ı bağla:** Workers & Pages → Create → Import a repository → bu repo (Worker adı: `mystreak`).
+   `main` dalına her push otomatik yayınlanır.
+3. **Şifre:** Worker → Settings → Variables and Secrets → `APP_PASSWORD` (Secret) ekle.
+   Koymazsan linki bilen herkes verini değiştirebilir.
 
-### 1) KV (veritabanı) oluştur
-Cloudflare paneli → **Storage & Databases → KV → Create** → adı `mystreak` olsun.
+Hatırlatma zamanlayıcısı (`*/15 * * * *`) ayar dosyasında tanımlı; ayrıca bir şey kurmaya gerek yok.
+Uygulamada ⚙️ **Ayarlar → Günlük hatırlatma**'yı aç ve "Test bildirimi gönder" ile dene.
 
-### 2) Pages projesini oluştur
-**Workers & Pages → Create → Pages → Connect to Git** → bu repoyu seç.
-- Production branch: `main`
-- Build command: *(boş)*
-- Build output directory: `public`
+> 📱 **iPhone:** Bildirimler iOS 16.4+ sürümünde ve uygulama Safari'den **Paylaş → Ana Ekrana Ekle** ile eklenip oradan açıldığında çalışır.
 
-### 3) Ayarlar (Pages projesi → Settings)
-**Bindings → Add → KV namespace**: Variable name `DB`, namespace `mystreak`.
-
-**Variables and Secrets** (hepsini *Secret* olarak ekle):
-| İsim | Değer |
-|---|---|
-| `APP_PASSWORD` | Uygulamaya giriş şifren (koymazsan linki bilen herkes verini değiştirebilir) |
-| `CRON_SECRET` | Rastgele uzun bir metin (ör. `k3Jd9...`), hatırlatma adresini korur |
-| `JSONBIN_BIN_ID` | *(sadece taşıma için)* `69751843d0ea881f4082844a` |
-| `JSONBIN_KEY` | *(sadece taşıma için)* jsonbin'den aldığın **yeni** Master Key |
-
-Sonra **Deployments → Retry deployment** ile yeniden yayınla.
-
-İlk açılışta eski verilerin jsonbin'den KV'ye otomatik aktarılır. Sonrasında jsonbin'e hiç istek gitmez;
-iki `JSONBIN_` değişkenini silebilirsin.
-
-> ⚠️ **Güvenlik:** Eski sürümde jsonbin anahtarı kodun içinde açıkça duruyordu ve git geçmişinde hâlâ görünüyor.
-> jsonbin.io → sol menü **API KEYS** → yeni bir Master Key oluştur → eskisini sil.
-
-### 4) Hatırlatma zamanlayıcısı (bildirimler için)
-Pages kendi başına zamanlanmış görev çalıştıramaz, bu yüzden küçük bir Worker onu 15 dakikada bir dürter:
-1. **Workers & Pages → Create → Worker** → adı `mystreak-cron` → Deploy → **Edit code**, içine `cron-worker.js` dosyasının içeriğini yapıştır → Deploy.
-2. Worker → **Settings → Variables**: `CRON_URL` = `https://SENIN-SITEN.pages.dev/api/cron?key=CRON_SECRET_DEĞERİN`
-3. Worker → **Settings → Triggers → Cron Triggers → Add**: `*/15 * * * *`
-
-Son olarak uygulamada ⚙️ **Ayarlar → Günlük hatırlatma**'yı aç, saati seç ve "Test bildirimi gönder" ile dene.
-
-> 📱 **iPhone:** Bildirimler sadece iOS 16.4+ sürümünde ve uygulama Safari'den **Paylaş → Ana Ekrana Ekle** ile eklenip oradan açıldığında çalışır.
-
-### 5) Alan adı (isteğe bağlı)
-Pages projesi → **Custom domains** → Cloudflare'den aldığın alan adını bağla. Alan adını değiştirirsen `CRON_URL`'i de güncelle.
+> ⚠️ Eski sürümde jsonbin anahtarı kodun içinde açıkça duruyordu. jsonbin.io → **API KEYS** → eski anahtarı sil.
+> Eski verileri taşımak istersen `JSONBIN_BIN_ID` ve `JSONBIN_KEY` değişkenlerini ekle; KV boşsa ilk açılışta aktarılır.
 
 ## Yerelde deneme
 ```
-npx wrangler pages dev public --kv DB
+npx wrangler dev
 ```
