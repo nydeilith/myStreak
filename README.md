@@ -7,6 +7,8 @@ Alışkanlık / seri (streak) takip uygulaması. Cloudflare Workers üzerinde ç
 - **Haftanın günleri:** Her alışkanlık için hangi günler yapılacağını seç (ör. spor Pzt/Çar/Cum). Plan dışı günler seriyi bozmaz.
 - **İzin günü:** Hastalık, tatil gibi günleri takvimden "izinli" işaretle; serin bozulmaz.
 - **Aklımda:** Notların, nokta bulutundan oluşan ve parmakla 360° çevrilebilen 3D bir beynin etrafında durur (three.js, `public/vendor`). Aklına geleni tek satırla bırak, istersen saat ver. Zamanı gelince bildirim gelir; Android'de bildirimden "Yaptım" ya da "1 saat ertele" denebilir. Aklındaki şey arttıkça beyin görseli doygunlaşır.
+- **Beyin bölgeleri:** Notlar kategoriye göre beynin bir bölgesinde toplanır (İş/Okul ön lob, Günlük hayat tepe, Aile şakak lobu, Fikirler arka lob, Sağlık beyincik). Kategoriye dokununca kamera o bölgeye yakınlaşır.
+- **Gizli alışkanlık:** İşaretlenen alışkanlıklar listede, grafiklerde, aylık kartta ve bildirim metninde görünmez; alev logosuna basılı tutunca açılır, uygulamadan çıkınca yeniden gizlenir.
 - **Odak sayacı:** Alışkanlığa süre verirsen (ör. 20 dk) işaret butonu sayacı başlatır; süre bitince otomatik işaretlenir. Uygulama kapansa da kaldığı yerden devam eder.
 - **Ruh hali ve günün notu:** Her gün 1–5 ruh hali ve tek satır not; "Son bir yıl" grafiğinde ruh hali görünümü ve hangi alışkanlığın iyi günlerle birlikte gittiği.
 - **Seri koruyucu:** Aktif serin varken kaçırılan planlı gün ayda 2 kez otomatik korunur; uygulamada ve ertesi günkü bildirimde haber verilir. Ayarlar'dan kapatılabilir.
