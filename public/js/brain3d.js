@@ -154,6 +154,39 @@ export function mountBrain(stage, { onPick } = {}) {
   const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, uniforms, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
   root.add(new THREE.Points(geo, mat));
 
+  // Kategori bölgeleri: aynı kategorideki notlar beynin aynı bölümünde toplanır
+  const REGIONS = {
+    is: [0, 0.3, 0.72],        // ön lob: planlama, iş
+    gunluk: [0, 0.56, -0.12],  // tepe (parietal): gündelik işler
+    aile: [0.62, -0.16, 0.1],  // şakak lobu: hafıza, duygular, ilişkiler
+    fikir: [0, 0.2, -0.86],    // arka (oksipital): hayal, fikir
+    saglik: [0, -0.42, -0.62], // beyincik: beden, sağlık
+  };
+  const anchors = {};
+  for (const [k, c] of Object.entries(REGIONS)) {
+    const best = [];
+    for (let i = 0; i < data.pos.length; i += 3) {
+      const d = (data.pos[i] - c[0]) ** 2 + (data.pos[i + 1] - c[1]) ** 2 + (data.pos[i + 2] - c[2]) ** 2;
+      if (best.length < 48) { best.push([d, i]); if (best.length === 48) best.sort((a, b) => a[0] - b[0]); }
+      else if (d < best[47][0]) { best[47] = [d, i]; best.sort((a, b) => a[0] - b[0]); }
+    }
+    anchors[k] = best.map(([, i]) => [data.pos[i], data.pos[i + 1], data.pos[i + 2]]);
+  }
+  const glowTex = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+  })();
+  const glows = {};
+  for (const [k, c] of Object.entries(REGIONS)) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 }));
+    sp.position.set(...c); sp.scale.set(0.75, 0.75, 1);
+    root.add(sp); glows[k] = sp;
+  }
+  let focusCat = null, anim = null;
+
   // Not düğümleri: yüzeyde parlayan nokta + dışarı uzanan çizgi + HTML etiket
   const nodeGeo = new THREE.BufferGeometry();
   const nodeMat = new THREE.PointsMaterial({ size: 0.075, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
@@ -172,17 +205,25 @@ export function mountBrain(stage, { onPick } = {}) {
 
   function setNotes(list) {
     layer.innerHTML = '';
-    const shown = list.slice(0, 16);
+    const shown = list.slice(0, 24);
     const npos = [], ncol = [], lpos = [];
+    const perCat = {}, used = {};
+    shown.forEach((n) => { perCat[n.cat] = (perCat[n.cat] || 0) + 1; });
+    Object.entries(glows).forEach(([k, g]) => { g.userData.color = null; g.material.opacity = 0; });
     items = shown.map((n, i) => {
-      // Her not beynin belli bir noktasına "bağlanır" (id'ye göre sabit), etiketi o yönde dışarıda durur
-      const s = data.surface[hash(n.id) % data.surface.length];
-      const dir = new THREE.Vector3(...s).normalize();
-      const tip = dir.clone().multiplyScalar(1.22 + (i % 3) * 0.12);
-      tip.y = tip.y * 0.55 + 0.05;
+      // Not, kategorisinin bölgesindeki bir noktaya bağlanır; etiketi o bölgeden dışarı doğru, kardeşleriyle üst üste durur
+      const cat = REGIONS[n.cat] ? n.cat : 'gunluk';
+      const k = used[cat] = (used[cat] || 0) + 1;
+      const pool = anchors[cat];
+      const s = pool[(hash(n.id) + k * 7) % pool.length];
+      const col = new THREE.Color(n.color || '#34d399');
+      glows[cat].material.color = col; glows[cat].userData.color = col;
+      const dir = new THREE.Vector3(...REGIONS[cat]).normalize();
+      const tip = dir.clone().multiplyScalar(1.3);
+      tip.y = tip.y * 0.6 + 0.05 + (k - 1 - (perCat[cat] - 1) / 2) * 0.16;
       const late = !!n.late;
       npos.push(...s);
-      const c = late ? [0.96, 0.62, 0.04] : [0.2, 0.83, 0.6];
+      const c = late ? [0.96, 0.62, 0.04] : [col.r, col.g, col.b];
       ncol.push(...c);
       lpos.push(...s, tip.x, tip.y, tip.z);
       const el = document.createElement('button');
@@ -190,12 +231,24 @@ export function mountBrain(stage, { onPick } = {}) {
       el.textContent = n.text.length > 26 ? n.text.slice(0, 25) + '…' : n.text;
       el.addEventListener('click', (e) => { e.stopPropagation(); selected = n.id; onPick && onPick(n.id); highlight(); });
       layer.appendChild(el);
-      return { id: n.id, el, tip, width: 0 };
+      el.style.setProperty('--cc', n.color || '#34d399');
+      return { id: n.id, el, tip, width: 0, cat };
     });
     nodeGeo.setAttribute('position', new THREE.Float32BufferAttribute(npos, 3));
     nodeGeo.setAttribute('color', new THREE.Float32BufferAttribute(ncol, 3));
     lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(lpos, 3));
     nodeGeo.computeBoundingSphere(); lineGeo.computeBoundingSphere();
+  }
+  // Bir kategoriye "gir": kamera o bölgeye yaklaşır, beyin bölgeyi kameraya çevirir, diğer notlar kaybolur
+  function focus(cat) {
+    focusCat = REGIONS[cat] ? cat : null;
+    lastInput = performance.now();
+    if (!focusCat) { anim = { rotX: 0.12, dist: 4.0 }; return; }
+    const [cx, cy, cz] = REGIONS[focusCat];
+    let ty = -Math.atan2(cx, cz);
+    while (ty - rotY > Math.PI) ty -= Math.PI * 2;
+    while (rotY - ty > Math.PI) ty += Math.PI * 2;
+    anim = { rotY: ty, rotX: Math.atan2(cy, Math.hypot(cx, cz)) * 0.9, dist: 2.35 };
   }
   function highlight() { items.forEach((it) => it.el.classList.toggle('sel', it.id === selected)); }
   function select(id) { selected = id; highlight(); }
@@ -206,7 +259,7 @@ export function mountBrain(stage, { onPick } = {}) {
   let pinch = 0;
   const cv = renderer.domElement;
   cv.style.touchAction = 'none';
-  cv.addEventListener('pointerdown', (e) => { cv.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); lastInput = performance.now(); });
+  cv.addEventListener('pointerdown', (e) => { anim = null; cv.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); lastInput = performance.now(); });
   cv.addEventListener('pointermove', (e) => {
     if (!pointers.has(e.pointerId)) return;
     const [px, py] = pointers.get(e.pointerId);
@@ -242,9 +295,21 @@ export function mountBrain(stage, { onPick } = {}) {
     if (!running) return;
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
-    if (!pointers.size) {
+    if (anim && !pointers.size) {
+      const k = Math.min(1, dt * 3.2);
+      if (anim.rotY != null) rotY += (anim.rotY - rotY) * k;
+      if (anim.rotX != null) rotX += (anim.rotX - rotX) * k;
+      dist += (anim.dist - dist) * k;
+      if (Math.abs(anim.dist - dist) < 0.01 && (anim.rotY == null || Math.abs(anim.rotY - rotY) < 0.01)) anim = null;
+    } else if (!pointers.size) {
       vy *= 0.94; vx *= 0.9; rotY += vy; rotX = Math.min(1.1, Math.max(-1.1, rotX + vx));
-      if (now - lastInput > 2500) { rotY += dt * 0.16; rotX += (0.12 - rotX) * dt * 0.6; }
+      if (!focusCat && now - lastInput > 2500) { rotY += dt * 0.16; rotX += (0.12 - rotX) * dt * 0.6; }
+    }
+    // Bölge ışıkları: odaktaki bölge parlar ve nabız gibi atar
+    for (const [k, g] of Object.entries(glows)) {
+      if (!g.userData.color) { g.material.opacity = 0; continue; }
+      const target = focusCat ? (k === focusCat ? 0.85 + 0.15 * Math.sin(now / 300) : 0.05) : 0.35;
+      g.material.opacity += (target - g.material.opacity) * Math.min(1, dt * 4);
     }
     root.rotation.set(rotX, rotY, 0);
     camera.position.set(0, 0.05, dist);
@@ -265,14 +330,15 @@ export function mountBrain(stage, { onPick } = {}) {
       const lx = Math.min(w - ew - 8, Math.max(8, v.x < 0 ? x - ew - 6 : x + 6));
       let ly = Math.min(h - 40, Math.max(76, y));
       // Aynı hizadaki etiketler üst üste binmesin: aşağı kaydır
-      if (!behind) {
+      if (!behind && !(focusCat && it.cat !== focusCat)) {
         for (const r of placed) if (lx < r.x + r.w && r.x < lx + ew && Math.abs(ly - r.y) < 26) ly = r.y + 26;
         placed.push({ x: lx, y: ly, w: ew });
       }
       it.el.style.transform = `translate(${lx}px, ${ly}px) translate(0, -50%)`;
-      it.el.style.opacity = behind ? 0.28 : 1;
+      const hidden = focusCat && it.cat !== focusCat;
+      it.el.style.opacity = hidden ? 0 : behind ? 0.28 : 1;
       it.el.style.zIndex = behind ? 1 : 2;
-      it.el.style.pointerEvents = behind ? 'none' : 'auto';
+      it.el.style.pointerEvents = hidden || behind ? 'none' : 'auto';
     }
   }
   function setVisible(on) {
@@ -281,5 +347,5 @@ export function mountBrain(stage, { onPick } = {}) {
   }
   document.addEventListener('visibilitychange', () => { if (document.hidden) setVisible(false); });
 
-  return { setNotes, setVisible, select };
+  return { setNotes, setVisible, select, focus };
 }
